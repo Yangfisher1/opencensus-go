@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // Package opencensus contains Go support for OpenCensus.
-package opencensus // import "go.opencensus.io"
+package opencensus // import "github.com/Yangfisher1/opencensus-go"
 
 // Version is the current release version of OpenCensus in use.
 func Version() string {

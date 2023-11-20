@@ -1,6 +1,6 @@
 /.idea/
 
-# go.opencensus.io/exporter/aws
+# github.com/Yangfisher1/opencensus-go/exporter/aws
 /exporter/aws/
 
 # Exclude vendor, use dep ensure after checkout:

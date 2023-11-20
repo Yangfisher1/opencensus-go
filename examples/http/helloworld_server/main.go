@@ -20,12 +20,12 @@ import (
 	"net/http"
 	"time"
 
-	"go.opencensus.io/zpages"
+	"github.com/Yangfisher1/opencensus-go/zpages"
 
-	"go.opencensus.io/examples/exporter"
-	"go.opencensus.io/plugin/ochttp"
-	"go.opencensus.io/stats/view"
-	"go.opencensus.io/trace"
+	"github.com/Yangfisher1/opencensus-go/examples/exporter"
+	"github.com/Yangfisher1/opencensus-go/plugin/ochttp"
+	"github.com/Yangfisher1/opencensus-go/stats/view"
+	"github.com/Yangfisher1/opencensus-go/trace"
 )
 
 const (

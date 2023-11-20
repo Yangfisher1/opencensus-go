@@ -19,8 +19,8 @@ import (
 	"sort"
 	"time"
 
-	"go.opencensus.io/internal/tagencoding"
-	"go.opencensus.io/tag"
+	"github.com/Yangfisher1/opencensus-go/internal/tagencoding"
+	"github.com/Yangfisher1/opencensus-go/tag"
 )
 
 type collector struct {

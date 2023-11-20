@@ -19,8 +19,8 @@ import (
 	"strings"
 	"testing"
 
-	"go.opencensus.io/stats"
-	"go.opencensus.io/stats/view"
+	"github.com/Yangfisher1/opencensus-go/stats"
+	"github.com/Yangfisher1/opencensus-go/stats/view"
 )
 
 func TestSpecServerMeasures(t *testing.T) {

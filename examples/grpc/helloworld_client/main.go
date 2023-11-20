@@ -20,10 +20,10 @@ import (
 	"os"
 	"time"
 
-	"go.opencensus.io/examples/exporter"
-	pb "go.opencensus.io/examples/grpc/proto"
-	"go.opencensus.io/plugin/ocgrpc"
-	"go.opencensus.io/stats/view"
+	"github.com/Yangfisher1/opencensus-go/examples/exporter"
+	pb "github.com/Yangfisher1/opencensus-go/examples/grpc/proto"
+	"github.com/Yangfisher1/opencensus-go/plugin/ocgrpc"
+	"github.com/Yangfisher1/opencensus-go/stats/view"
 	"google.golang.org/grpc"
 )
 

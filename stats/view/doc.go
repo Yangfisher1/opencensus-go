@@ -34,14 +34,14 @@
 // Libraries can define views but it is recommended that in most cases registering
 // views be left up to applications.
 //
-// Exporting
+// # Exporting
 //
 // Collected and aggregated data can be exported to a metric collection
 // backend by registering its exporter.
 //
 // Multiple exporters can be registered to upload the data to various
 // different back ends.
-package view // import "go.opencensus.io/stats/view"
+package view // import "github.com/Yangfisher1/opencensus-go/stats/view"
 
 // TODO(acetechnologist): Add a link to the language independent OpenCensus
 // spec when it is available.

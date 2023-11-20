@@ -1,4 +1,4 @@
-module go.opencensus.io
+module github.com/Yangfisher1/opencensus-go
 
 require (
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e

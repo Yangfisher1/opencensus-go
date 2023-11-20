@@ -15,9 +15,9 @@
 package ochttp
 
 import (
-	"go.opencensus.io/stats"
-	"go.opencensus.io/stats/view"
-	"go.opencensus.io/tag"
+	"github.com/Yangfisher1/opencensus-go/stats"
+	"github.com/Yangfisher1/opencensus-go/stats/view"
+	"github.com/Yangfisher1/opencensus-go/tag"
 )
 
 // Deprecated: client HTTP measures.

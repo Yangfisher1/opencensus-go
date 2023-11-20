@@ -22,11 +22,11 @@ import (
 
 	"encoding/json"
 
+	"github.com/Yangfisher1/opencensus-go/metric/metricdata"
+	"github.com/Yangfisher1/opencensus-go/metric/metricexport"
+	"github.com/Yangfisher1/opencensus-go/stats"
+	"github.com/Yangfisher1/opencensus-go/tag"
 	"github.com/google/go-cmp/cmp"
-	"go.opencensus.io/metric/metricdata"
-	"go.opencensus.io/metric/metricexport"
-	"go.opencensus.io/stats"
-	"go.opencensus.io/tag"
 )
 
 type recordValWithTag struct {

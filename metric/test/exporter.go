@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"go.opencensus.io/metric/metricdata"
-	"go.opencensus.io/metric/metricexport"
-	"go.opencensus.io/stats/view"
+	"github.com/Yangfisher1/opencensus-go/metric/metricdata"
+	"github.com/Yangfisher1/opencensus-go/metric/metricexport"
+	"github.com/Yangfisher1/opencensus-go/stats/view"
 )
 
 // Exporter keeps exported metric data in memory to aid in testing the instrumentation.
@@ -56,7 +56,7 @@ func (e *Exporter) ReadAndExport() {
 	e.metricReader.ReadAndExport(e)
 }
 
-// String defines the ``native'' format for the exporter.
+// String defines the “native” format for the exporter.
 func (e *Exporter) String() string {
 	return fmt.Sprintf("points{%v}", e.points)
 }

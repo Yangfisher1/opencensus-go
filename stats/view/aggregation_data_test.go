@@ -20,9 +20,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Yangfisher1/opencensus-go/metric/metricdata"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	"go.opencensus.io/metric/metricdata"
 )
 
 func TestDataClone(t *testing.T) {

@@ -21,8 +21,8 @@ import (
 	"testing"
 	"time"
 
-	"go.opencensus.io/stats"
-	"go.opencensus.io/tag"
+	"github.com/Yangfisher1/opencensus-go/stats"
+	"github.com/Yangfisher1/opencensus-go/tag"
 )
 
 var (

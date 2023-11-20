@@ -11,7 +11,7 @@ It has these top-level messages:
 	FooRequest
 	FooResponse
 */
-package testpb // import "go.opencensus.io/internal/testpb"
+package testpb // import "github.com/Yangfisher1/opencensus-go/internal/testpb"
 
 import (
 	fmt "fmt"

@@ -21,9 +21,9 @@ import (
 	"testing"
 	"time"
 
-	"go.opencensus.io/metric"
-	"go.opencensus.io/metric/metricdata"
-	"go.opencensus.io/metric/metricproducer"
+	"github.com/Yangfisher1/opencensus-go/metric"
+	"github.com/Yangfisher1/opencensus-go/metric/metricdata"
+	"github.com/Yangfisher1/opencensus-go/metric/metricproducer"
 )
 
 var (

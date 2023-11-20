@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"go.opencensus.io/stats"
+	"github.com/Yangfisher1/opencensus-go/stats"
 )
 
 func TestMeasureFloat64AndInt64(t *testing.T) {

@@ -18,10 +18,10 @@ import (
 	"context"
 	"testing"
 
-	"go.opencensus.io/stats"
-	"go.opencensus.io/stats/view"
-	_ "go.opencensus.io/stats/view" // enable collection
-	"go.opencensus.io/tag"
+	"github.com/Yangfisher1/opencensus-go/stats"
+	"github.com/Yangfisher1/opencensus-go/stats/view"
+	_ "github.com/Yangfisher1/opencensus-go/stats/view" // enable collection
+	"github.com/Yangfisher1/opencensus-go/tag"
 )
 
 var m = makeMeasure()

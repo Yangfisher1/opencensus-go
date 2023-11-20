@@ -22,8 +22,8 @@ import (
 	"testing"
 	"time"
 
-	"go.opencensus.io/plugin/ocgrpc"
-	"go.opencensus.io/trace"
+	"github.com/Yangfisher1/opencensus-go/plugin/ocgrpc"
+	"github.com/Yangfisher1/opencensus-go/trace"
 	"google.golang.org/grpc"
 )
 

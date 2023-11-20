@@ -17,7 +17,7 @@
 // This example shows how to use gauge metrics. The program records two gauges, one to demonstrate
 // a gauge with int64 value and the other to demonstrate a gauge with float64 value.
 //
-// Metrics
+// # Metrics
 //
 // 1. process_heap_alloc (int64): Total bytes used by objects allocated in the heap.
 // It includes objects currently used and objects that are freed but not garbage collected.
@@ -41,10 +41,10 @@ import (
 	"strings"
 	"time"
 
-	"go.opencensus.io/examples/exporter"
-	"go.opencensus.io/metric"
-	"go.opencensus.io/metric/metricdata"
-	"go.opencensus.io/metric/metricproducer"
+	"github.com/Yangfisher1/opencensus-go/examples/exporter"
+	"github.com/Yangfisher1/opencensus-go/metric"
+	"github.com/Yangfisher1/opencensus-go/metric/metricdata"
+	"github.com/Yangfisher1/opencensus-go/metric/metricproducer"
 )
 
 const (

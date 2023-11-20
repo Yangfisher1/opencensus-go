@@ -23,9 +23,9 @@ import (
 	"sync"
 	"testing"
 
-	"go.opencensus.io/plugin/ochttp"
-	"go.opencensus.io/stats/view"
-	"go.opencensus.io/trace"
+	"github.com/Yangfisher1/opencensus-go/plugin/ochttp"
+	"github.com/Yangfisher1/opencensus-go/stats/view"
+	"github.com/Yangfisher1/opencensus-go/trace"
 )
 
 const reqCount = 5

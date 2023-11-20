@@ -23,13 +23,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Yangfisher1/opencensus-go/resource"
 	"github.com/google/go-cmp/cmp"
-	"go.opencensus.io/resource"
 
-	"go.opencensus.io/metric/metricdata"
-	"go.opencensus.io/metric/metricexport"
-	"go.opencensus.io/stats"
-	"go.opencensus.io/tag"
+	"github.com/Yangfisher1/opencensus-go/metric/metricdata"
+	"github.com/Yangfisher1/opencensus-go/metric/metricexport"
+	"github.com/Yangfisher1/opencensus-go/stats"
+	"github.com/Yangfisher1/opencensus-go/tag"
 )
 
 func Test_Worker_ViewRegistration(t *testing.T) {

@@ -16,9 +16,9 @@
 package ocgrpc
 
 import (
-	"go.opencensus.io/stats"
-	"go.opencensus.io/stats/view"
-	"go.opencensus.io/tag"
+	"github.com/Yangfisher1/opencensus-go/stats"
+	"github.com/Yangfisher1/opencensus-go/stats/view"
+	"github.com/Yangfisher1/opencensus-go/tag"
 )
 
 // The following variables are measures are recorded by ClientHandler:

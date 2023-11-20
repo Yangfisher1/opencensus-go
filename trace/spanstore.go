@@ -18,7 +18,7 @@ import (
 	"sync"
 	"time"
 
-	"go.opencensus.io/internal"
+	"github.com/Yangfisher1/opencensus-go/internal"
 )
 
 const (

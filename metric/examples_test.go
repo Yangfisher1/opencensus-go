@@ -17,8 +17,8 @@ package metric_test
 import (
 	"net/http"
 
-	"go.opencensus.io/metric"
-	"go.opencensus.io/metric/metricdata"
+	"github.com/Yangfisher1/opencensus-go/metric"
+	"github.com/Yangfisher1/opencensus-go/metric/metricdata"
 )
 
 func ExampleRegistry_AddInt64Gauge() {

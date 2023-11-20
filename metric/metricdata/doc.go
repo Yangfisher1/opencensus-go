@@ -16,4 +16,4 @@
 //
 // This is an EXPERIMENTAL package, and may change in arbitrary ways without
 // notice.
-package metricdata // import "go.opencensus.io/metric/metricdata"
+package metricdata // import "github.com/Yangfisher1/opencensus-go/metric/metricdata"

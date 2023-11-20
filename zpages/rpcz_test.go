@@ -20,8 +20,8 @@ import (
 	"testing"
 	"time"
 
-	"go.opencensus.io/internal/testpb"
-	"go.opencensus.io/stats/view"
+	"github.com/Yangfisher1/opencensus-go/internal/testpb"
+	"github.com/Yangfisher1/opencensus-go/stats/view"
 )
 
 func TestRpcz(t *testing.T) {

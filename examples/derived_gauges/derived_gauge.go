@@ -20,7 +20,7 @@
 // items. Consumer randomly consumes 1-5 items in each attempt. It then sleeps randomly
 // between 1-10 seconds before the next attempt. Two metrics collected to monitor the queue.
 //
-// Metrics
+// # Metrics
 //
 // * queue_size: It is an instantaneous queue size represented using derived gauge int64.
 //
@@ -39,10 +39,10 @@ import (
 	"sync"
 	"time"
 
-	"go.opencensus.io/examples/exporter"
-	"go.opencensus.io/metric"
-	"go.opencensus.io/metric/metricdata"
-	"go.opencensus.io/metric/metricproducer"
+	"github.com/Yangfisher1/opencensus-go/examples/exporter"
+	"github.com/Yangfisher1/opencensus-go/metric"
+	"github.com/Yangfisher1/opencensus-go/metric/metricdata"
+	"github.com/Yangfisher1/opencensus-go/metric/metricproducer"
 )
 
 const (

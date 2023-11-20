@@ -25,7 +25,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	"go.opencensus.io/trace"
+	"github.com/Yangfisher1/opencensus-go/trace"
 )
 
 var (

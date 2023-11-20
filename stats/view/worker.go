@@ -20,13 +20,13 @@ import (
 	"sync"
 	"time"
 
-	"go.opencensus.io/resource"
+	"github.com/Yangfisher1/opencensus-go/resource"
 
-	"go.opencensus.io/metric/metricdata"
-	"go.opencensus.io/metric/metricproducer"
-	"go.opencensus.io/stats"
-	"go.opencensus.io/stats/internal"
-	"go.opencensus.io/tag"
+	"github.com/Yangfisher1/opencensus-go/metric/metricdata"
+	"github.com/Yangfisher1/opencensus-go/metric/metricproducer"
+	"github.com/Yangfisher1/opencensus-go/stats"
+	"github.com/Yangfisher1/opencensus-go/stats/internal"
+	"github.com/Yangfisher1/opencensus-go/tag"
 )
 
 func init() {

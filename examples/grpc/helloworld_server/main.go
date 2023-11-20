@@ -24,12 +24,12 @@ import (
 	"net/http"
 	"time"
 
-	"go.opencensus.io/examples/exporter"
-	pb "go.opencensus.io/examples/grpc/proto"
-	"go.opencensus.io/plugin/ocgrpc"
-	"go.opencensus.io/stats/view"
-	"go.opencensus.io/trace"
-	"go.opencensus.io/zpages"
+	"github.com/Yangfisher1/opencensus-go/examples/exporter"
+	pb "github.com/Yangfisher1/opencensus-go/examples/grpc/proto"
+	"github.com/Yangfisher1/opencensus-go/plugin/ocgrpc"
+	"github.com/Yangfisher1/opencensus-go/stats/view"
+	"github.com/Yangfisher1/opencensus-go/trace"
+	"github.com/Yangfisher1/opencensus-go/zpages"
 	"google.golang.org/grpc"
 )
 
