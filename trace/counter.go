@@ -7,8 +7,9 @@ import (
 type globalCounter int64
 
 var (
-	generatedSpanCounter globalCounter
-	reportedSpanCounter  globalCounter
+	// Make them exported
+	GeneratedSpanCounter globalCounter
+	ReportedSpanCounter  globalCounter
 )
 
 func (c *globalCounter) set(value int64) {
