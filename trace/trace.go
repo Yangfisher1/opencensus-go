@@ -293,12 +293,12 @@ func (s *span) End() {
 			if s.spanStore != nil {
 				s.spanStore.finished(s, sd)
 			}
-			GeneratedSpanCounter.Inc()
-			// if mustExport {
-			// 	for e := range exp {
-			// 		e.ExportSpan(sd)
-			// 	}
-			// }
+			// Currently move whether to export into Exporters.
+			if mustExport {
+				for e := range exp {
+					e.ExportSpan(sd)
+				}
+			}
 		}
 	})
 }
