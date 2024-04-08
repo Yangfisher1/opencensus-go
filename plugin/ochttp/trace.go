@@ -45,6 +45,7 @@ type traceTransport struct {
 	format         propagation.HTTPFormat
 	formatSpanName func(*http.Request) string
 	newClientTrace func(*http.Request, *trace.Span) *httptrace.ClientTrace
+	isUserSpan     bool
 }
 
 // TODO(jbd): Add message events for request and response size.
@@ -81,6 +82,13 @@ func (t *traceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	}
 
 	span.AddAttributes(requestAttrs(req)...)
+
+	if t.isUserSpan {
+		// TODO: adding information into span for filtering
+		attrs := trace.StringAttribute("is_user_span", "true")
+		span.AddAttributes(attrs)
+	}
+
 	resp, err := t.base.RoundTrip(req)
 	if err != nil {
 		span.SetStatus(trace.Status{Code: trace.StatusCodeUnknown, Message: err.Error()})

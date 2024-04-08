@@ -61,6 +61,7 @@ type Transport struct {
 	// httptrace package.
 	NewClientTrace func(*http.Request, *trace.Span) *httptrace.ClientTrace
 
+	IsUserSpan bool
 	// TODO: Implement tag propagation for HTTP.
 }
 
@@ -94,6 +95,7 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 		},
 		formatSpanName: spanNameFormatter,
 		newClientTrace: t.NewClientTrace,
+		isUserSpan:     t.IsUserSpan,
 	}
 	rt = statsTransport{base: rt}
 	return rt.RoundTrip(req)
