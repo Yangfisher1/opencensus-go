@@ -186,6 +186,13 @@ func (s *Span) EndAndAggregate(w http.ResponseWriter, r *http.Request) {
 	s.internal.EndAndAggregate(w, r)
 }
 
+func (s *Span) EndAtClient(resp *http.Response) {
+	if s == nil {
+		return
+	}
+	s.internal.EndAtClient(resp)
+}
+
 // SpanContext returns the SpanContext of the span.
 func (s *Span) SpanContext() SpanContext {
 	if s == nil {

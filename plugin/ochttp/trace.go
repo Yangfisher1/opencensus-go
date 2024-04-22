@@ -94,7 +94,7 @@ func (t *traceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 		span.SetStatus(trace.Status{Code: trace.StatusCodeUnknown, Message: err.Error()})
 		// TODO: At here, as a client side span, judge the type of span and
 		// encoding important information at here
-		span.End()
+		span.EndAtClient(resp)
 		return resp, err
 	}
 
