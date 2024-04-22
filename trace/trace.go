@@ -336,7 +336,7 @@ func (s *span) EndAndAggregate(w http.ResponseWriter, r *http.Request) {
 						json.NewEncoder(w).Encode(ssd)
 					case Aggregate:
 						// At this point, we should report all the spans into the backend
-						// TODO: how to solve this?
+						e.AggregateSpanFromHeader(w.Header())
 					case PerformanceDown:
 						// Just encoding the whole information here
 						json.NewEncoder(w).Encode(sd)

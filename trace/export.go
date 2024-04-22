@@ -15,6 +15,7 @@
 package trace
 
 import (
+	"net/http"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -31,6 +32,7 @@ type Exporter interface {
 	ExportSpan(s *SpanData)
 	// Filter whether span is valid or not
 	FilterSpan(s *SpanData) ErrorType
+	AggregateSpanFromHeader(w http.Header)
 }
 
 type exportersMap map[Exporter]struct{}
