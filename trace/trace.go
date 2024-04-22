@@ -18,8 +18,10 @@ import (
 	"context"
 	crand "crypto/rand"
 	"encoding/binary"
+	"encoding/json"
 	"fmt"
 	"math/rand"
+	"net/http"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -303,6 +305,51 @@ func (s *span) End() {
 	})
 }
 
+// End ends the span with response aggregation
+func (s *span) EndAndAggregate(w http.ResponseWriter, r *http.Request) {
+	if s == nil {
+		return
+	}
+	if s.executionTracerTaskEnd != nil {
+		s.executionTracerTaskEnd()
+	}
+	if !s.IsRecordingEvents() {
+		return
+	}
+	s.endOnce.Do(func() {
+		exp, _ := exporters.Load().(exportersMap)
+		mustExport := s.spanContext.IsSampled() && len(exp) > 0
+		if s.spanStore != nil || mustExport {
+			sd := s.makeSpanData()
+			sd.EndTime = internal.MonotonicEndTime(sd.StartTime)
+			if s.spanStore != nil {
+				s.spanStore.finished(s, sd)
+			}
+			if mustExport {
+				// Check whether the request is valid or not
+				for e := range exp {
+					errType := e.FilterSpan(sd)
+					switch errType {
+					case OK:
+						ssd := makeServerlessSpanData(sd)
+						// Valid one, encoding information into the response header
+						json.NewEncoder(w).Encode(ssd)
+					case Aggregate:
+						// At this point, we should report all the spans into the backend
+						// TODO: how to solve this?
+					case PerformanceDown:
+						// Just encoding the whole information here
+						json.NewEncoder(w).Encode(sd)
+					case Error:
+						// Report the span immediately
+						e.ExportSpan(sd)
+					}
+				}
+			}
+		}
+	})
+}
+
 // makeSpanData produces a SpanData representing the current state of the Span.
 // It requires that s.data is non-nil.
 func (s *span) makeSpanData() *SpanData {
@@ -327,6 +374,20 @@ func (s *span) makeSpanData() *SpanData {
 	}
 	s.mu.Unlock()
 	return &sd
+}
+
+func makeServerlessSpanData(sd *SpanData) ServerlessSpanData {
+	var ssd ServerlessSpanData
+
+	ssd.TraceID = sd.TraceID
+	ssd.SpanID = sd.SpanID
+	ssd.ParentSpanID = sd.ParentSpanID
+	ssd.Name = sd.Name
+	ssd.SpanKind = sd.SpanKind
+	ssd.StartTime = sd.StartTime
+	ssd.EndTime = sd.EndTime
+
+	return ssd
 }
 
 // SpanContext returns the SpanContext of the span.

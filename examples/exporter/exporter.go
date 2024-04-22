@@ -103,3 +103,7 @@ func (e *PrintExporter) ExportSpan(vd *trace.SpanData) {
 		}
 	}
 }
+
+func (e *PrintExporter) FilterSpan(s *trace.SpanData) trace.ErrorType {
+	return trace.OK
+}

@@ -29,6 +29,8 @@ import (
 // The SpanData should not be modified, but a pointer to it can be kept.
 type Exporter interface {
 	ExportSpan(s *SpanData)
+	// Filter whether span is valid or not
+	FilterSpan(s *SpanData) ErrorType
 }
 
 type exportersMap map[Exporter]struct{}
@@ -95,3 +97,24 @@ type SpanData struct {
 	// ChildSpanCount holds the number of child span created for this span.
 	ChildSpanCount int
 }
+
+// ServerlessSpanData contains all the necessary information for a normal serverless span.
+// TODO: simplify this struct later maybe
+type ServerlessSpanData struct {
+	TraceID      TraceID
+	SpanID       SpanID
+	ParentSpanID SpanID
+	Name         string
+	SpanKind     int
+	StartTime    time.Time
+	EndTime      time.Time
+}
+
+type ErrorType int
+
+const (
+	OK ErrorType = iota
+	Aggregate
+	PerformanceDown
+	Error
+)

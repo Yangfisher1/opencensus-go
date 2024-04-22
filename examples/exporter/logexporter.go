@@ -222,3 +222,7 @@ func (e *LogExporter) ExportSpan(sd *trace.SpanData) {
 		}
 	}
 }
+
+func (e *LogExporter) FilterSpan(s *trace.SpanData) trace.ErrorType {
+	return trace.OK
+}

@@ -81,6 +81,11 @@ type Handler struct {
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var tags addedTags
 	r, traceEnd := h.startTrace(w, r)
+	// TODO: check whether the span is valid or not
+	// If so, encoding it into the response header
+	// Otherwise, judge it by its error type
+	// If error, just directly report it
+	// otherwise due to performance problem we just encoding it into the response header
 	defer traceEnd()
 	w, statsEnd := h.startStats(w, r)
 	defer statsEnd(&tags)
