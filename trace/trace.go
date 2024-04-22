@@ -15,6 +15,7 @@
 package trace
 
 import (
+	"bytes"
 	"context"
 	crand "crypto/rand"
 	"encoding/binary"
@@ -333,13 +334,82 @@ func (s *span) EndAndAggregate(w http.ResponseWriter, r *http.Request) {
 					case OK:
 						ssd := makeServerlessSpanData(sd)
 						// Valid one, encoding information into the response header
-						json.NewEncoder(w).Encode(ssd)
+						buf := new(bytes.Buffer)
+						err := json.NewEncoder(buf).Encode(ssd)
+						if err != nil {
+							fmt.Println("Failed to encoding data into hdr", err)
+							return
+						}
+						w.Header().Set("agg", buf.String())
 					case Aggregate:
 						// At this point, we should report all the spans into the backend
 						e.AggregateSpanFromHeader(w.Header())
 					case PerformanceDown:
 						// Just encoding the whole information here
-						json.NewEncoder(w).Encode(sd)
+						buf := new(bytes.Buffer)
+						err := json.NewEncoder(buf).Encode(sd)
+						if err != nil {
+							fmt.Println("Failed to encoding data into hdr", err)
+							return
+						}
+						w.Header().Set("agg", buf.String())
+					case Error:
+						// Report the span immediately
+						e.ExportSpan(sd)
+					}
+				}
+			}
+		}
+	})
+}
+
+func (s *span) EndAtClient(resp *http.Response) {
+	if s == nil {
+		return
+	}
+	if s.executionTracerTaskEnd != nil {
+		s.executionTracerTaskEnd()
+	}
+	if !s.IsRecordingEvents() {
+		return
+	}
+	s.endOnce.Do(func() {
+		exp, _ := exporters.Load().(exportersMap)
+		mustExport := s.spanContext.IsSampled() && len(exp) > 0
+		if s.spanStore != nil || mustExport {
+			sd := s.makeSpanData()
+			sd.EndTime = internal.MonotonicEndTime(sd.StartTime)
+			if s.spanStore != nil {
+				s.spanStore.finished(s, sd)
+			}
+			if mustExport {
+				// Check whether the request is valid or not
+				for e := range exp {
+					errType := e.FilterSpan(sd)
+					switch errType {
+					case OK:
+						ssd := makeServerlessSpanData(sd)
+						// Valid one, encoding information into the response header
+						buf := new(bytes.Buffer)
+						err := json.NewEncoder(buf).Encode(ssd)
+						if err != nil {
+							fmt.Println("Failed to encoding data into hdr", err)
+							return
+						}
+						resp.Header.Set("agg", buf.String())
+					case Aggregate:
+						// At this point, we should report all the spans into the backend
+						// TODO: client side maybe never do aggregation?
+						e.AggregateSpanFromHeader(resp.Header)
+					case PerformanceDown:
+						// Just encoding the whole information here
+						buf := new(bytes.Buffer)
+						err := json.NewEncoder(buf).Encode(sd)
+						if err != nil {
+							fmt.Println("Failed to encoding data into hdr", err)
+							return
+						}
+						resp.Header.Set("agg", buf.String())
 					case Error:
 						// Report the span immediately
 						e.ExportSpan(sd)

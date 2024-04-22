@@ -94,8 +94,11 @@ type SpanInterface interface {
 	// End ends the span.
 	End()
 
-	// End ends the span with response aggregation
+	// EndAndAggregate ends the span with response aggregation
 	EndAndAggregate(w http.ResponseWriter, r *http.Request)
+
+	// EndAtClient ends the span as a client span and propagation in resp.
+	EndAtClient(resp *http.Response)
 
 	// SpanContext returns the SpanContext of the span.
 	SpanContext() SpanContext
