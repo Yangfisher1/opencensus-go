@@ -80,6 +80,8 @@ type Handler struct {
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var tags addedTags
+	// Adding the trailer headers here
+	w.Header().Set("Trailer", "agg")
 	r, traceEnd := h.startServerlessTrace(w, r)
 	defer traceEnd(w, r)
 	w, statsEnd := h.startStats(w, r)

@@ -333,7 +333,6 @@ func (s *span) EndAndAggregate(w http.ResponseWriter, r *http.Request) {
 					errType := e.FilterSpan(sd)
 					switch errType {
 					case OK:
-						w.Header().Set("Trailer", "agg")
 						ssd := makeServerlessSpanData(sd)
 						// Valid one, encoding information into the response header
 						buf := new(bytes.Buffer)
@@ -348,7 +347,6 @@ func (s *span) EndAndAggregate(w http.ResponseWriter, r *http.Request) {
 						e.AggregateSpanFromHeader(w.Header())
 					case PerformanceDown:
 						// Just encoding the whole information here
-						w.Header().Set("Trailer", "agg")
 						buf := new(bytes.Buffer)
 						err := json.NewEncoder(buf).Encode(sd)
 						if err != nil {
