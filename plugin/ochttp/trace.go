@@ -15,6 +15,7 @@
 package ochttp
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptrace"
@@ -97,6 +98,10 @@ func (t *traceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 		// FIXME: not here, but in the end of the span
 		span.EndAtClient(resp)
 		return resp, err
+	}
+
+	for key, value := range resp.Header {
+		fmt.Println("key: ", key, "value: ", value)
 	}
 
 	span.AddAttributes(responseAttrs(resp)...)
