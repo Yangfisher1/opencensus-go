@@ -94,6 +94,7 @@ func (t *traceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 		span.SetStatus(trace.Status{Code: trace.StatusCodeUnknown, Message: err.Error()})
 		// TODO: At here, as a client side span, judge the type of span and
 		// encoding important information at here
+		// FIXME: not here, but in the end of the span
 		span.EndAtClient(resp)
 		return resp, err
 	}
@@ -104,6 +105,8 @@ func (t *traceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	// span.End() will be invoked after
 	// a read from resp.Body returns io.EOF or when
 	// resp.Body.Close() is invoked.
+
+	// TODO: adding a method of encoding the span into memory
 	bt := &bodyTracker{rc: resp.Body, span: span}
 	resp.Body = wrappedBody(bt, resp.Body)
 	return resp, err
@@ -247,7 +250,7 @@ func isHealthEndpoint(path string) bool {
 	// can be extremely noisy and expensive.
 	// Disable canonical health checking endpoints
 	// like /healthz and /_ah/health for now.
-	if path == "/healthz" || path == "/_ah/health" {
+	if path == "/healthz" || path == "/_ah/health" || path == "/probe" {
 		return true
 	}
 	return false

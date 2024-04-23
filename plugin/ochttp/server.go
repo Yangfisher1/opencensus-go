@@ -80,13 +80,8 @@ type Handler struct {
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var tags addedTags
-	r, traceEnd := h.startTrace(w, r)
-	// TODO: check whether the span is valid or not
-	// If so, encoding it into the response header
-	// Otherwise, judge it by its error type
-	// If error, just directly report it
-	// otherwise due to performance problem we just encoding it into the response header
-	defer traceEnd()
+	r, traceEnd := h.startServerlessTrace(w, r)
+	defer traceEnd(w, r)
 	w, statsEnd := h.startStats(w, r)
 	defer statsEnd(&tags)
 	handler := h.Handler
@@ -142,6 +137,53 @@ func (h *Handler) startTrace(w http.ResponseWriter, r *http.Request) (*http.Requ
 			r.ContentLength, -1)
 	}
 	return r.WithContext(ctx), span.End
+}
+
+func (h *Handler) startServerlessTrace(w http.ResponseWriter, r *http.Request) (*http.Request, func(http.ResponseWriter, *http.Request)) {
+	if h.IsHealthEndpoint != nil && h.IsHealthEndpoint(r) || isHealthEndpoint(r.URL.Path) {
+		return r, func(http.ResponseWriter, *http.Request) {}
+	}
+	var name string
+	if h.FormatSpanName == nil {
+		name = spanNameFromURL(r)
+	} else {
+		name = h.FormatSpanName(r)
+	}
+	ctx := r.Context()
+
+	startOpts := h.StartOptions
+	if h.GetStartOptions != nil {
+		startOpts = h.GetStartOptions(r)
+	}
+
+	var span *trace.Span
+	sc, ok := h.extractSpanContext(r)
+	if ok && !h.IsPublicEndpoint {
+		ctx, span = trace.StartSpanWithRemoteParent(ctx, name, sc,
+			trace.WithSampler(startOpts.Sampler),
+			trace.WithSpanKind(trace.SpanKindServer))
+	} else {
+		ctx, span = trace.StartSpan(ctx, name,
+			trace.WithSampler(startOpts.Sampler),
+			trace.WithSpanKind(trace.SpanKindServer),
+		)
+		if ok {
+			span.AddLink(trace.Link{
+				TraceID:    sc.TraceID,
+				SpanID:     sc.SpanID,
+				Type:       trace.LinkTypeParent,
+				Attributes: nil,
+			})
+		}
+	}
+	span.AddAttributes(requestAttrs(r)...)
+	if r.Body == nil {
+		// TODO: Handle cases where ContentLength is not set.
+	} else if r.ContentLength > 0 {
+		span.AddMessageReceiveEvent(0, /* TODO: messageID */
+			r.ContentLength, -1)
+	}
+	return r.WithContext(ctx), span.EndAndAggregate
 }
 
 func (h *Handler) extractSpanContext(r *http.Request) (trace.SpanContext, bool) {
