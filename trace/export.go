@@ -103,13 +103,13 @@ type SpanData struct {
 // ServerlessSpanData contains all the necessary information for a normal serverless span.
 // TODO: simplify this struct later maybe
 type ServerlessSpanData struct {
-	TraceID      TraceID
-	SpanID       SpanID
-	ParentSpanID SpanID
+	TraceID      string
+	SpanID       string
+	ParentSpanID string
 	Name         string
 	SpanKind     int
-	StartTime    time.Time
-	EndTime      time.Time
+	StartTime    string
+	EndTime      string
 }
 
 type ErrorType int

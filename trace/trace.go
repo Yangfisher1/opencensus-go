@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -358,12 +359,6 @@ func (s *span) EndAndAggregate(w http.ResponseWriter, r *http.Request) {
 						// Report the span immediately
 						e.ExportSpan(sd)
 					}
-
-					// Check response header
-					for key, value := range w.Header() {
-						fmt.Println("key: ", key)
-						fmt.Println("value: ", value)
-					}
 				}
 			}
 		}
@@ -456,13 +451,13 @@ func (s *span) makeSpanData() *SpanData {
 func makeServerlessSpanData(sd *SpanData) ServerlessSpanData {
 	var ssd ServerlessSpanData
 
-	ssd.TraceID = sd.TraceID
-	ssd.SpanID = sd.SpanID
-	ssd.ParentSpanID = sd.ParentSpanID
+	ssd.TraceID = sd.TraceID.String()
+	ssd.SpanID = sd.SpanID.String()
+	ssd.ParentSpanID = sd.ParentSpanID.String()
 	ssd.Name = sd.Name
 	ssd.SpanKind = sd.SpanKind
-	ssd.StartTime = sd.StartTime
-	ssd.EndTime = sd.EndTime
+	ssd.StartTime = strconv.FormatInt(sd.StartTime.UnixNano(), 10)
+	ssd.EndTime = strconv.FormatInt(sd.EndTime.UnixNano(), 10)
 
 	return ssd
 }
