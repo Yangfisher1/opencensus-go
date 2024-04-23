@@ -331,7 +331,6 @@ func (s *span) EndAndAggregate(w http.ResponseWriter, r *http.Request) {
 				// Check whether the request is valid or not
 				for e := range exp {
 					errType := e.FilterSpan(sd)
-					fmt.Println("errType: ", errType)
 					switch errType {
 					case OK:
 						ssd := makeServerlessSpanData(sd)
