@@ -454,9 +454,8 @@ func makeServerlessSpanData(sd *SpanData) ServerlessSpanData {
 	ssd.SpanID = sd.SpanID.String()
 	ssd.ParentSpanID = sd.ParentSpanID.String()
 	ssd.Name = sd.Name
-	ssd.SpanKind = sd.SpanKind
 	ssd.StartTime = strconv.FormatInt(sd.StartTime.UnixNano(), 10)
-	ssd.EndTime = strconv.FormatInt(sd.EndTime.UnixNano(), 10)
+	ssd.Duration = strconv.FormatInt(sd.EndTime.UnixNano()-sd.StartTime.UnixNano(), 10)
 
 	return ssd
 }

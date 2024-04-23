@@ -107,9 +107,8 @@ type ServerlessSpanData struct {
 	SpanID       string
 	ParentSpanID string
 	Name         string
-	SpanKind     int
 	StartTime    string
-	EndTime      string
+	Duration     string
 }
 
 type ErrorType int
