@@ -266,8 +266,7 @@ func startSpanInternal(name string, hasParent bool, parent SpanContext, remotePa
 		s.data.ParentSpanID = parent.SpanID
 	}
 	if internal.LocalSpanStoreEnabled {
-		var ss *spanStore
-		ss = spanStoreForNameCreateIfNew(name)
+		ss := spanStoreForNameCreateIfNew(name)
 		if ss != nil {
 			s.spanStore = ss
 			ss.add(s)
@@ -397,7 +396,7 @@ func (s *span) EndAtClient(resp *http.Header) {
 							fmt.Println("Failed to encoding data into hdr", err)
 							return
 						}
-						resp.Set("Agg", buf.String())
+						resp.Add("Agg", buf.String())
 					case Aggregate:
 						// At this point, we should report all the spans into the backend
 						// TODO: client side maybe never do aggregation?
@@ -410,7 +409,7 @@ func (s *span) EndAtClient(resp *http.Header) {
 							fmt.Println("Failed to encoding data into hdr", err)
 							return
 						}
-						resp.Set("Agg", buf.String())
+						resp.Add("Agg", buf.String())
 					case Error:
 						// Report the span immediately
 						e.ExportSpan(sd)
