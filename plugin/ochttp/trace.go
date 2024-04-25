@@ -15,6 +15,7 @@
 package ochttp
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptrace"
@@ -100,6 +101,7 @@ func (t *traceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	if resp.Trailer == nil {
 		resp.Trailer = make(http.Header)
 	}
+	fmt.Println("Roundtrip trailer when receiving: ", resp.Trailer["Agg"])
 
 	span.AddAttributes(responseAttrs(resp)...)
 	span.SetStatus(TraceStatus(resp.StatusCode, resp.Status))
