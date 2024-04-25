@@ -454,7 +454,12 @@ func makeServerlessSpanData(sd *SpanData) ServerlessSpanData {
 	// TODO: maybe use base64 encoding here to reduce network packet size?
 	// ssd.TraceID = base64.StdEncoding.EncodeToString(sd.TraceID[:])
 	ssd.SpanID = sd.SpanID.String()
-	ssd.ParentSpanID = sd.ParentSpanID.String()
+	// Maybe parentSpanId can be NULL
+	if sd.ParentSpanID != [8]byte{} {
+		ssd.ParentSpanID = sd.ParentSpanID.String()
+	} else {
+		ssd.ParentSpanID = ""
+	}
 	ssd.Name = sd.Name
 	ssd.StartTime = strconv.FormatInt(sd.StartTime.UnixNano(), 10)
 	ssd.Duration = strconv.FormatInt(sd.EndTime.UnixNano()-sd.StartTime.UnixNano(), 10)
