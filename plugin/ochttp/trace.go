@@ -103,9 +103,8 @@ func (t *traceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	// span.End() will be invoked after
 	// a read from resp.Body returns io.EOF or when
 	// resp.Body.Close() is invoked.
-
-	// TODO: adding a method of encoding the span into memory
-	bt := &bodyTracker{rc: resp.Body, span: span, respHeader: &resp.Header}
+	// TODO: how to combine trailer & resp header?
+	bt := &bodyTracker{rc: resp.Body, span: span, trailer: &resp.Trailer}
 	resp.Body = wrappedBody(bt, resp.Body)
 	return resp, err
 }
@@ -114,9 +113,9 @@ func (t *traceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 // trace.EndSpan on encountering io.EOF on reading
 // the body of the original response.
 type bodyTracker struct {
-	rc         io.ReadCloser
-	span       *trace.Span
-	respHeader *http.Header
+	rc      io.ReadCloser
+	span    *trace.Span
+	trailer *http.Header
 }
 
 var _ io.ReadCloser = (*bodyTracker)(nil)
@@ -129,7 +128,7 @@ func (bt *bodyTracker) Read(b []byte) (int, error) {
 	case nil:
 		return n, nil
 	case io.EOF:
-		bt.span.EndAtClient(bt.respHeader)
+		bt.span.EndAtClient(bt.trailer)
 	default:
 		// For all other errors, set the span status
 		bt.span.SetStatus(trace.Status{
@@ -145,7 +144,7 @@ func (bt *bodyTracker) Close() error {
 	// Invoking endSpan on Close will help catch the cases
 	// in which a read returned a non-nil error, we set the
 	// span status but didn't end the span.
-	bt.span.EndAtClient(bt.respHeader)
+	bt.span.EndAtClient(bt.trailer)
 	return bt.rc.Close()
 }
 
