@@ -341,7 +341,7 @@ func (s *span) EndAndAggregate(w http.ResponseWriter, r *http.Request) {
 							fmt.Println("Failed to encoding data into hdr", err)
 							return
 						}
-						w.Header().Add("agg", buf.String())
+						w.Header().Add("Agg", buf.String())
 					case Aggregate:
 						// At this point, we should report all the spans into the backend
 						e.AggregateSpanFromHeader(w.Header())
@@ -353,7 +353,7 @@ func (s *span) EndAndAggregate(w http.ResponseWriter, r *http.Request) {
 							fmt.Println("Failed to encoding data into hdr", err)
 							return
 						}
-						w.Header().Add("agg", buf.String())
+						w.Header().Add("Agg", buf.String())
 					case Error:
 						// Report the span immediately
 						e.ExportSpan(sd)
@@ -397,7 +397,7 @@ func (s *span) EndAtClient(resp *http.Header) {
 							fmt.Println("Failed to encoding data into hdr", err)
 							return
 						}
-						resp.Set("agg", buf.String())
+						resp.Set("Agg", buf.String())
 					case Aggregate:
 						// At this point, we should report all the spans into the backend
 						// TODO: client side maybe never do aggregation?
@@ -410,7 +410,7 @@ func (s *span) EndAtClient(resp *http.Header) {
 							fmt.Println("Failed to encoding data into hdr", err)
 							return
 						}
-						resp.Set("agg", buf.String())
+						resp.Set("Agg", buf.String())
 					case Error:
 						// Report the span immediately
 						e.ExportSpan(sd)

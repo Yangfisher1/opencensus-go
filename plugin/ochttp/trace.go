@@ -90,7 +90,7 @@ func (t *traceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	}
 
 	resp, err := t.base.RoundTrip(req)
-	resp.Header.Set("Trailer", "agg")
+	resp.Header.Set("Trailer", "Agg")
 	if err != nil {
 		span.SetStatus(trace.Status{Code: trace.StatusCodeUnknown, Message: err.Error()})
 		span.EndAtClient(&resp.Header)
