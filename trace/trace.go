@@ -414,6 +414,10 @@ func (s *span) EndAtClient(resp *http.Header) {
 						// Report the span immediately
 						e.ExportSpan(sd)
 					}
+					// Output the debug information
+					for key, value := range *resp {
+						fmt.Println("Trailer key: ", key, " value: ", value)
+					}
 				}
 			}
 		}
