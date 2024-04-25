@@ -90,6 +90,7 @@ func (t *traceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	}
 
 	resp, err := t.base.RoundTrip(req)
+	// Prevent the header to be nil when the trailer header is nil
 	resp.Trailer = make(http.Header)
 	if err != nil {
 		span.SetStatus(trace.Status{Code: trace.StatusCodeUnknown, Message: err.Error()})

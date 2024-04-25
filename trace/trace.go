@@ -353,7 +353,7 @@ func (s *span) EndAndAggregate(w http.ResponseWriter, r *http.Request) {
 							return
 						}
 						w.Header().Add("Agg", buf.String())
-					case Error:
+					case Error, UserSpec:
 						// Report the span immediately
 						e.ExportSpan(sd)
 					}
@@ -410,7 +410,7 @@ func (s *span) EndAtClient(resp *http.Header) {
 							return
 						}
 						resp.Add("Agg", buf.String())
-					case Error:
+					case Error, UserSpec:
 						// Report the span immediately
 						e.ExportSpan(sd)
 					}
