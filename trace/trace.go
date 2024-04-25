@@ -328,6 +328,7 @@ func (s *span) EndAndAggregate(w http.ResponseWriter, r *http.Request) {
 			}
 			if mustExport {
 				// Check whether the request is valid or not
+				fmt.Println("Before Trailer at server: ", w.Header()["Agg"])
 				for e := range exp {
 					errType := e.FilterSpan(sd)
 					switch errType {
@@ -358,6 +359,7 @@ func (s *span) EndAndAggregate(w http.ResponseWriter, r *http.Request) {
 						e.ExportSpan(sd)
 					}
 				}
+				fmt.Println("After Trailer at server: ", w.Header()["Agg"])
 			}
 		}
 	})
@@ -384,7 +386,7 @@ func (s *span) EndAtClient(resp *http.Header) {
 			}
 			if mustExport {
 				// Output the debug information
-				fmt.Println("Before Trailer at server: ", (*resp)["Agg"])
+				fmt.Println("Before Trailer at client: ", (*resp)["Agg"])
 				// Check whether the request is valid or not
 				for e := range exp {
 					errType := e.FilterSpan(sd)
@@ -417,7 +419,7 @@ func (s *span) EndAtClient(resp *http.Header) {
 						e.ExportSpan(sd)
 					}
 				}
-				fmt.Println("After Trailer at server: ", (*resp)["Agg"])
+				fmt.Println("After Trailer at client: ", (*resp)["Agg"])
 			}
 		}
 	})
