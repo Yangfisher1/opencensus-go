@@ -327,6 +327,11 @@ func (s *span) EndAndAggregate(w http.ResponseWriter, r *http.Request) {
 				s.spanStore.finished(s, sd)
 			}
 			if mustExport {
+				// Output the debug information
+				for key, value := range w.Header() {
+					fmt.Println("Trailer at server key: ", key, " value: ", value)
+				}
+
 				// Check whether the request is valid or not
 				for e := range exp {
 					errType := e.FilterSpan(sd)
@@ -385,7 +390,7 @@ func (s *span) EndAtClient(resp *http.Header) {
 			if mustExport {
 				// Output the debug information
 				for key, value := range *resp {
-					fmt.Println("Trailer key: ", key, " value: ", value)
+					fmt.Println("Trailer at client key: ", key, " value: ", value)
 				}
 
 				// Check whether the request is valid or not
