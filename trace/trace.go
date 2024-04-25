@@ -383,6 +383,11 @@ func (s *span) EndAtClient(resp *http.Header) {
 				s.spanStore.finished(s, sd)
 			}
 			if mustExport {
+				// Output the debug information
+				for key, value := range *resp {
+					fmt.Println("Trailer key: ", key, " value: ", value)
+				}
+
 				// Check whether the request is valid or not
 				for e := range exp {
 					errType := e.FilterSpan(sd)
@@ -413,10 +418,6 @@ func (s *span) EndAtClient(resp *http.Header) {
 					case Error, UserSpec:
 						// Report the span immediately
 						e.ExportSpan(sd)
-					}
-					// Output the debug information
-					for key, value := range *resp {
-						fmt.Println("Trailer key: ", key, " value: ", value)
 					}
 				}
 			}
