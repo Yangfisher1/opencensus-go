@@ -364,7 +364,7 @@ func (s *span) EndAndAggregate(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (s *span) EndAtClient(resp *http.Response) {
+func (s *span) EndAtClient(resp *http.Header) {
 	if s == nil {
 		return
 	}
@@ -397,11 +397,11 @@ func (s *span) EndAtClient(resp *http.Response) {
 							fmt.Println("Failed to encoding data into hdr", err)
 							return
 						}
-						resp.Header.Set("agg", buf.String())
+						resp.Set("agg", buf.String())
 					case Aggregate:
 						// At this point, we should report all the spans into the backend
 						// TODO: client side maybe never do aggregation?
-						e.AggregateSpanFromHeader(resp.Header)
+						e.AggregateSpanFromHeader(*resp)
 					case PerformanceDown:
 						// Just encoding the whole information here
 						buf := new(bytes.Buffer)
@@ -410,7 +410,7 @@ func (s *span) EndAtClient(resp *http.Response) {
 							fmt.Println("Failed to encoding data into hdr", err)
 							return
 						}
-						resp.Header.Set("agg", buf.String())
+						resp.Set("agg", buf.String())
 					case Error:
 						// Report the span immediately
 						e.ExportSpan(sd)
@@ -451,6 +451,8 @@ func makeServerlessSpanData(sd *SpanData) ServerlessSpanData {
 	var ssd ServerlessSpanData
 
 	ssd.TraceID = sd.TraceID.String()
+	// TODO: maybe use base64 encoding here to reduce network packet size?
+	// ssd.TraceID = base64.StdEncoding.EncodeToString(sd.TraceID[:])
 	ssd.SpanID = sd.SpanID.String()
 	ssd.ParentSpanID = sd.ParentSpanID.String()
 	ssd.Name = sd.Name

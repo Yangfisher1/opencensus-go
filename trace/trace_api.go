@@ -98,7 +98,7 @@ type SpanInterface interface {
 	EndAndAggregate(w http.ResponseWriter, r *http.Request)
 
 	// EndAtClient ends the span as a client span and propagation in resp.
-	EndAtClient(resp *http.Response)
+	EndAtClient(h *http.Header)
 
 	// SpanContext returns the SpanContext of the span.
 	SpanContext() SpanContext
@@ -186,11 +186,11 @@ func (s *Span) EndAndAggregate(w http.ResponseWriter, r *http.Request) {
 	s.internal.EndAndAggregate(w, r)
 }
 
-func (s *Span) EndAtClient(resp *http.Response) {
+func (s *Span) EndAtClient(h *http.Header) {
 	if s == nil {
 		return
 	}
-	s.internal.EndAtClient(resp)
+	s.internal.EndAtClient(h)
 }
 
 // SpanContext returns the SpanContext of the span.
