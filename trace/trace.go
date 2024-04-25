@@ -328,9 +328,7 @@ func (s *span) EndAndAggregate(w http.ResponseWriter, r *http.Request) {
 			}
 			if mustExport {
 				// Output the debug information
-				for key, value := range w.Header() {
-					fmt.Println("Trailer at server key: ", key, " value: ", value)
-				}
+				fmt.Println("Before Trailer at server: ", w.Header()["Agg"])
 
 				// Check whether the request is valid or not
 				for e := range exp {
@@ -363,6 +361,8 @@ func (s *span) EndAndAggregate(w http.ResponseWriter, r *http.Request) {
 						e.ExportSpan(sd)
 					}
 				}
+
+				fmt.Println("After Trailer at server: ", w.Header()["Agg"])
 			}
 		}
 	})
@@ -388,11 +388,6 @@ func (s *span) EndAtClient(resp *http.Header) {
 				s.spanStore.finished(s, sd)
 			}
 			if mustExport {
-				// Output the debug information
-				for key, value := range *resp {
-					fmt.Println("Trailer at client key: ", key, " value: ", value)
-				}
-
 				// Check whether the request is valid or not
 				for e := range exp {
 					errType := e.FilterSpan(sd)
