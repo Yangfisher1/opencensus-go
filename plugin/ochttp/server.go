@@ -16,7 +16,6 @@ package ochttp
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -83,10 +82,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var tags addedTags
 	// Adding the trailer headers here
 	w.Header().Set("Trailer", "Agg")
-	fmt.Println("Let's checkout here")
-	for k, v := range w.Header() {
-		fmt.Println("Header: ", k, v)
-	}
+
 	r, traceEnd := h.startServerlessTrace(w, r)
 	defer traceEnd(w, r)
 	w, statsEnd := h.startStats(w, r)
@@ -98,9 +94,11 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	r = r.WithContext(context.WithValue(r.Context(), addedTagsKey{}, &tags))
 	handler.ServeHTTP(w, r)
 
-	fmt.Println("Let's checkout again")
-	for k, v := range w.Header() {
-		fmt.Println("Header: ", k, v)
+	// Remove those duplicated trail header for aggregation part
+	// If there're more than 1 `Agg` headers in trailer,
+	// simply remove until there's only one
+	if len(w.Header()["Trailer"]) > 1 {
+		w.Header()["Trailer"] = w.Header()["Trailer"][:1]
 	}
 }
 
