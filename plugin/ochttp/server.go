@@ -16,6 +16,7 @@ package ochttp
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -82,6 +83,10 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var tags addedTags
 	// Adding the trailer headers here
 	w.Header().Set("Trailer", "Agg")
+	fmt.Println("Let's checkout here")
+	for k, v := range w.Header() {
+		fmt.Println("Header: ", k, v)
+	}
 	r, traceEnd := h.startServerlessTrace(w, r)
 	defer traceEnd(w, r)
 	w, statsEnd := h.startStats(w, r)
