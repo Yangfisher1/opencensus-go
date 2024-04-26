@@ -102,15 +102,13 @@ func (t *traceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 		resp.Trailer = make(http.Header)
 	}
 
-	fmt.Println("Trailer len: ", len(resp.Trailer))
-
 	span.AddAttributes(responseAttrs(resp)...)
 	span.SetStatus(TraceStatus(resp.StatusCode, resp.Status))
 
 	// span.End() will be invoked after
 	// a read from resp.Body returns io.EOF or when
 	// resp.Body.Close() is invoked.
-	// TODO: how to combine trailer & resp header?
+	// FIXME: The problem could be here by doubling the aggregated span info into the trailer within the resp Body.
 	bt := &bodyTracker{rc: resp.Body, span: span, trailer: &resp.Trailer}
 	resp.Body = wrappedBody(bt, resp.Body)
 	return resp, err
@@ -135,6 +133,7 @@ func (bt *bodyTracker) Read(b []byte) (int, error) {
 	case nil:
 		return n, nil
 	case io.EOF:
+		fmt.Println("When reading EOF:", (*bt.trailer)["Agg"])
 		bt.span.EndAtClient(bt.trailer)
 	default:
 		// For all other errors, set the span status
