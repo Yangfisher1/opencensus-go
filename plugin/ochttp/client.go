@@ -61,8 +61,11 @@ type Transport struct {
 	// httptrace package.
 	NewClientTrace func(*http.Request, *trace.Span) *httptrace.ClientTrace
 
+	// Whether to treat the span as a user-defined span.
 	IsUserSpan bool
-	// TODO: Implement tag propagation for HTTP.
+
+	// Whether to treat the span as an aggregation point.,
+	IsAggregationPoint bool
 }
 
 // RoundTrip implements http.RoundTripper, delegating to Base and recording stats and traces for the request.
@@ -93,9 +96,10 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 			Sampler:  startOpts.Sampler,
 			SpanKind: trace.SpanKindClient,
 		},
-		formatSpanName: spanNameFormatter,
-		newClientTrace: t.NewClientTrace,
-		isUserSpan:     t.IsUserSpan,
+		formatSpanName:     spanNameFormatter,
+		newClientTrace:     t.NewClientTrace,
+		isUserSpan:         t.IsUserSpan,
+		isAggregationPoint: t.IsAggregationPoint,
 	}
 	rt = statsTransport{base: rt}
 	return rt.RoundTrip(req)
