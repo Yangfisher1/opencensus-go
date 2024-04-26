@@ -15,6 +15,7 @@
 package ochttp
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptrace"
@@ -99,6 +100,11 @@ func (t *traceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	// Prevent the header to be nil when the trailer header is nil
 	if resp.Trailer == nil {
 		resp.Trailer = make(http.Header)
+		fmt.Println("Trailer in resp is nil")
+	} else {
+		for k, v := range resp.Trailer {
+			fmt.Println("Trailer: ", k, v)
+		}
 	}
 
 	span.AddAttributes(responseAttrs(resp)...)

@@ -76,6 +76,11 @@ type Handler struct {
 	// addition to the private isHealthEndpoint func which may also indicate
 	// tracing should be skipped.
 	IsHealthEndpoint func(*http.Request) bool
+
+	// IsProxyMode ensures that the handler serves as a proxy and so it
+	// will copy the trailer header from response and then duplicate
+	// the whole requests.
+	IsProxyMode bool
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -93,13 +98,6 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	r = r.WithContext(context.WithValue(r.Context(), addedTagsKey{}, &tags))
 	handler.ServeHTTP(w, r)
-
-	// Remove those duplicated trail header for aggregation part
-	// If there're more than 1 `Agg` headers in trailer,
-	// simply remove until there's only one
-	if len(w.Header()["Trailer"]) > 1 {
-		w.Header()["Trailer"] = w.Header()["Trailer"][:1]
-	}
 }
 
 func (h *Handler) startTrace(w http.ResponseWriter, r *http.Request) (*http.Request, func()) {
