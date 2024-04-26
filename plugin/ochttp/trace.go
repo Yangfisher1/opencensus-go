@@ -40,12 +40,13 @@ const (
 )
 
 type traceTransport struct {
-	base           http.RoundTripper
-	startOptions   trace.StartOptions
-	format         propagation.HTTPFormat
-	formatSpanName func(*http.Request) string
-	newClientTrace func(*http.Request, *trace.Span) *httptrace.ClientTrace
-	isUserSpan     bool
+	base               http.RoundTripper
+	startOptions       trace.StartOptions
+	format             propagation.HTTPFormat
+	formatSpanName     func(*http.Request) string
+	newClientTrace     func(*http.Request, *trace.Span) *httptrace.ClientTrace
+	isUserSpan         bool
+	isAggregationPoint bool
 }
 
 // TODO(jbd): Add message events for request and response size.
@@ -84,8 +85,12 @@ func (t *traceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	span.AddAttributes(requestAttrs(req)...)
 
 	if t.isUserSpan {
-		// TODO: adding information into span for filtering
-		attrs := trace.StringAttribute("is_user_span", "true")
+		attrs := trace.StringAttribute("usr", "y")
+		span.AddAttributes(attrs)
+	}
+
+	if t.isAggregationPoint {
+		attrs := trace.StringAttribute("agg", "y")
 		span.AddAttributes(attrs)
 	}
 
@@ -96,15 +101,7 @@ func (t *traceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 		return resp, err
 	}
 
-	// Prevent the header to be nil when the trailer header is nil
-	// if resp.Trailer == nil {
-	// 	resp.Trailer = make(http.Header)
-	// 	fmt.Println("Trailer in resp is nil")
-	// } else {
-	// 	for k, v := range resp.Trailer {
-	// 		fmt.Println("Trailer: ", k, v)
-	// 	}
-	// }
+	// Prevent overloading of trailer header
 	resp.Trailer = make(http.Header)
 
 	span.AddAttributes(responseAttrs(resp)...)
