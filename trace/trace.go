@@ -341,7 +341,7 @@ func (s *span) EndAndAggregate(w http.ResponseWriter, r *http.Request) {
 							return
 						}
 						w.Header().Add("Agg", buf.String())
-						fmt.Println("Encoding: ", buf.String(), " into trailer")
+						fmt.Println("Encoding: ", buf.String(), " into header")
 					case Aggregate:
 						// At this point, we should report all the spans into the backend
 						e.AggregateSpanFromHeader(w.Header())
@@ -398,6 +398,7 @@ func (s *span) EndAtClient(resp *http.Header) {
 							return
 						}
 						resp.Add("Agg", buf.String())
+						fmt.Println("Encoding: ", buf.String(), " into trailer")
 					case Aggregate:
 						// At this point, we should report all the spans into the backend
 						// TODO: client side maybe never do aggregation?
