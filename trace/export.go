@@ -107,8 +107,8 @@ type ServerlessSpanData struct {
 	SpanID       string `json:"s,omitempty"`
 	ParentSpanID string `json:"p,omitempty"`
 	Name         string `json:"n,omitempty"`
-	StartTime    string `json:"-"`
-	Duration     string `json:"-"`
+	StartTime    string `json:"f"`
+	Duration     string `json:"d"`
 }
 
 type ErrorType int
