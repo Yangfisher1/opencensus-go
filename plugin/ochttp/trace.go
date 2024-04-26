@@ -15,7 +15,6 @@
 package ochttp
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptrace"
@@ -128,12 +127,10 @@ var _ io.ReadCloser = (*bodyTracker)(nil)
 func (bt *bodyTracker) Read(b []byte) (int, error) {
 	n, err := bt.rc.Read(b)
 	// n, err := bt.rc.Read(b)
-
 	switch err {
 	case nil:
 		return n, nil
 	case io.EOF:
-		fmt.Println("When reading EOF:", (*bt.trailer)["Agg"])
 		bt.span.EndAtClient(bt.trailer)
 	default:
 		// For all other errors, set the span status
