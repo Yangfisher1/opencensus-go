@@ -102,10 +102,7 @@ func (t *traceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 		resp.Trailer = make(http.Header)
 	}
 
-	// It should be something there, since the span are propagated by the trailer part
-	for key, value := range resp.Trailer {
-		fmt.Println("Roundtrip trailer when receiving: ", key, value)
-	}
+	fmt.Println("Trailer len: ", len(resp.Trailer))
 
 	span.AddAttributes(responseAttrs(resp)...)
 	span.SetStatus(TraceStatus(resp.StatusCode, resp.Status))
