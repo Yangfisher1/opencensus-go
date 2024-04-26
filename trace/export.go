@@ -103,12 +103,12 @@ type SpanData struct {
 // ServerlessSpanData contains all the necessary information for a normal serverless span.
 // TODO: simplify this struct later maybe
 type ServerlessSpanData struct {
-	TraceID      string `json:"t"`
-	SpanID       string `json:"s"`
-	ParentSpanID string `json:"p"`
-	Name         string `json:"n"`
-	StartTime    string `json:"f"`
-	Duration     string `json:"d"`
+	TraceID      string `json:"t,omitempty"`
+	SpanID       string `json:"s,omitempty"`
+	ParentSpanID string `json:"p,omitempty"`
+	Name         string `json:"n,omitempty"`
+	StartTime    string `json:"-"`
+	Duration     string `json:"-"`
 }
 
 type ErrorType int
