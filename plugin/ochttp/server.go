@@ -76,11 +76,6 @@ type Handler struct {
 	// addition to the private isHealthEndpoint func which may also indicate
 	// tracing should be skipped.
 	IsHealthEndpoint func(*http.Request) bool
-
-	// IsProxyMode ensures that the handler serves as a proxy and so it
-	// will copy the trailer header from response and then duplicate
-	// the whole requests.
-	IsProxyMode bool
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
