@@ -342,7 +342,15 @@ func (s *span) EndAndAggregate(w http.ResponseWriter, r *http.Request) {
 						}
 						w.Header().Add("Agg", buf.String())
 					case Aggregate:
-						// At this point, we should report all the spans into the backend
+						ssd := makeServerlessSpanData(sd)
+						// Valid one, encoding information into the response header
+						buf := new(bytes.Buffer)
+						err := json.NewEncoder(buf).Encode(ssd)
+						if err != nil {
+							fmt.Println("Failed to encoding data into hdr", err)
+							return
+						}
+						w.Header().Add("Agg", buf.String())
 						e.AggregateSpanFromHeader(w.Header())
 					case PerformanceDown:
 						// Just encoding the whole information here
@@ -398,8 +406,15 @@ func (s *span) EndAtClient(resp *http.Header) {
 						}
 						resp.Add("Agg", buf.String())
 					case Aggregate:
-						// At this point, we should report all the spans into the backend
-						// TODO: client side maybe never do aggregation?
+						ssd := makeServerlessSpanData(sd)
+						// Valid one, encoding information into the response header
+						buf := new(bytes.Buffer)
+						err := json.NewEncoder(buf).Encode(ssd)
+						if err != nil {
+							fmt.Println("Failed to encoding data into hdr", err)
+							return
+						}
+						resp.Add("Agg", buf.String())
 						e.AggregateSpanFromHeader(*resp)
 					case PerformanceDown:
 						// Just encoding the whole information here
