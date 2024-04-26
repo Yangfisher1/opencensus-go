@@ -97,6 +97,11 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	r = r.WithContext(context.WithValue(r.Context(), addedTagsKey{}, &tags))
 	handler.ServeHTTP(w, r)
+
+	fmt.Println("Let's checkout again")
+	for k, v := range w.Header() {
+		fmt.Println("Header: ", k, v)
+	}
 }
 
 func (h *Handler) startTrace(w http.ResponseWriter, r *http.Request) (*http.Request, func()) {
