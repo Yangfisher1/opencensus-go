@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/Yangfisher1/opencensus-go/aggregater"
+	"github.com/Yangfisher1/opencensus-go/aggregator"
 )
 
 func TestBinary(t *testing.T) {
-	ctx := aggregater.SpanContext{Height: 257}
+	ctx := aggregator.SpanContext{Height: 257}
 	b := []byte{1, 1, 0, 0}
 	if b2 := Binary(ctx); !bytes.Equal(b2, b) {
 		t.Errorf("Binary: got serialization %02x want %02x", b2, b)

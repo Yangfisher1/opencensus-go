@@ -1,4 +1,4 @@
-package aggregater
+package aggregator
 
 import (
 	"context"
@@ -6,6 +6,8 @@ import (
 
 	"github.com/Yangfisher1/opencensus-go/trace"
 )
+
+var DefaultTracer Tracer = &tracer{}
 
 type Tracer interface {
 	// We won't have sampler anymore since we want a full tracing
@@ -41,6 +43,18 @@ type SpanInterface interface {
 	String() string
 
 	// TODO: adding more interfaces later
+}
+
+func StartSpan(ctx context.Context, name string, spanKind int) (context.Context, *Span) {
+	return DefaultTracer.StartSpan(ctx, name, spanKind)
+}
+
+func FromContext(ctx context.Context) *Span {
+	return DefaultTracer.FromContext(ctx)
+}
+
+func NewContext(parent context.Context, s *Span) context.Context {
+	return DefaultTracer.NewContext(parent, s)
 }
 
 // NewSpan is a convenience function for creating a *Span out of a *span

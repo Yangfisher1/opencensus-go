@@ -5,14 +5,14 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Yangfisher1/opencensus-go/aggregater"
+	"github.com/Yangfisher1/opencensus-go/aggregator"
 )
 
 func TestHTTPFormat_FromReq(t *testing.T) {
 	tests := []struct {
 		name    string
 		makeReq func() *http.Request
-		wantSc  aggregater.SpanContext
+		wantSc  aggregator.SpanContext
 		wantOk  bool
 	}{
 		{
@@ -22,7 +22,7 @@ func TestHTTPFormat_FromReq(t *testing.T) {
 				req.Header.Set(SpanHeightHeader, "01010000")
 				return req
 			},
-			wantSc: aggregater.SpanContext{
+			wantSc: aggregator.SpanContext{
 				Height: 257,
 			},
 			wantOk: true,
@@ -45,12 +45,12 @@ func TestHTTPFormat_FromReq(t *testing.T) {
 func TestHTTPFormat_ToReq(t *testing.T) {
 	tests := []struct {
 		name        string
-		sc          aggregater.SpanContext
+		sc          aggregator.SpanContext
 		wantHeaders map[string]string
 	}{
 		{
 			name: "height=257",
-			sc: aggregater.SpanContext{
+			sc: aggregator.SpanContext{
 				Height: 257,
 			},
 			wantHeaders: map[string]string{

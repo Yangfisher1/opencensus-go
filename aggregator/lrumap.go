@@ -1,4 +1,4 @@
-package aggregater
+package aggregator
 
 import (
 	"github.com/golang/groupcache/lru"

@@ -5,8 +5,8 @@ import (
 	"encoding/hex"
 	"net/http"
 
-	"github.com/Yangfisher1/opencensus-go/aggregater"
-	"github.com/Yangfisher1/opencensus-go/aggregater/propagation"
+	"github.com/Yangfisher1/opencensus-go/aggregator"
+	"github.com/Yangfisher1/opencensus-go/aggregator/propagation"
 )
 
 const (
@@ -18,13 +18,13 @@ type HTTPFormat struct{}
 var _ propagation.HTTPFormat = (*HTTPFormat)(nil)
 
 // SpanContextFromRequest extracts a B3 span context from incoming requests.
-func (f *HTTPFormat) SpanContextFromRequest(req *http.Request) (sc aggregater.SpanContext, ok bool) {
+func (f *HTTPFormat) SpanContextFromRequest(req *http.Request) (sc aggregator.SpanContext, ok bool) {
 	height, ok := ParseHeight(req.Header.Get(SpanHeightHeader))
 	if !ok {
-		return aggregater.SpanContext{}, false
+		return aggregator.SpanContext{}, false
 	}
 
-	return aggregater.SpanContext{
+	return aggregator.SpanContext{
 		Height: height,
 	}, true
 }
@@ -42,7 +42,7 @@ func ParseHeight(height string) (uint32, bool) {
 	return h, true
 }
 
-func (f *HTTPFormat) SpanContextToRequest(sc aggregater.SpanContext, req *http.Request) {
+func (f *HTTPFormat) SpanContextToRequest(sc aggregator.SpanContext, req *http.Request) {
 	var b [4]byte
 	binary.LittleEndian.PutUint32(b[:], sc.Height)
 	req.Header.Set(SpanHeightHeader, hex.EncodeToString(b[:]))
