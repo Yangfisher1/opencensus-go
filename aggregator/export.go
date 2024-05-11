@@ -15,7 +15,6 @@ type ErrorType int
 const (
 	OK ErrorType = iota
 	Aggregate
-	UserSpec
 	PerformanceDown
 	Error
 )
