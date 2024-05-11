@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/Yangfisher1/opencensus-go/internal"
-	"github.com/Yangfisher1/opencensus-go/trace"
 )
 
 type tracer struct{}
@@ -178,7 +177,7 @@ func (s *span) SpanContext() SpanContext {
 }
 
 // SetStatus sets the status of the span, if it is recording events.
-func (s *span) SetStatus(status trace.Status) {
+func (s *span) SetStatus(status Status) {
 	s.mu.Lock()
 	s.data.Status = status
 	s.mu.Unlock()
@@ -191,12 +190,16 @@ func (s *span) SetName(name string) {
 	s.mu.Unlock()
 }
 
-func (s *span) AddAttributes(attributes ...trace.Attribute) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+func (s *span) copyToCappedAttributes(attributes []Attribute) {
 	for _, a := range attributes {
-		s.lruAttributes.add(a.Key, a.Value)
+		s.lruAttributes.add(a.key, a.value)
 	}
+}
+
+func (s *span) AddAttributes(attributes ...Attribute) {
+	s.mu.Lock()
+	s.copyToCappedAttributes(attributes)
+	s.mu.Unlock()
 }
 
 func (s *span) String() string {

@@ -5,8 +5,6 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-
-	"github.com/Yangfisher1/opencensus-go/trace"
 )
 
 type ErrorType int
@@ -83,7 +81,7 @@ type SpanData struct {
 	EndTime time.Time
 	// The values of Attributes each have type string, bool, or int64.
 	Attributes map[string]interface{}
-	trace.Status
+	Status
 	// TODO: adding more fields later
 }
 

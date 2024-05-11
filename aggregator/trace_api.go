@@ -3,8 +3,6 @@ package aggregator
 import (
 	"context"
 	"net/http"
-
-	"github.com/Yangfisher1/opencensus-go/trace"
 )
 
 var DefaultTracer Tracer = &tracer{}
@@ -37,12 +35,12 @@ type SpanInterface interface {
 	SetName(name string)
 
 	// SetStatus sets the status of the span, if it is recording events.
-	SetStatus(status trace.Status)
+	SetStatus(status Status)
 
 	// AddAttributes sets attributes in the span.
 	//
 	// Existing attributes whose keys appear in the attributes parameter are overwritten.
-	AddAttributes(attributes ...trace.Attribute)
+	AddAttributes(attributes ...Attribute)
 
 	// String prints a string representation of a span.
 	String() string
@@ -107,14 +105,14 @@ func (s *Span) SetName(name string) {
 }
 
 // SetStatus sets the status of the span, if it is recording events.
-func (s *Span) SetStatus(status trace.Status) {
+func (s *Span) SetStatus(status Status) {
 	s.internal.SetStatus(status)
 }
 
 // AddAttributes sets attributes in the span.
 //
 // Existing attributes whose keys appear in the attributes parameter are overwritten.
-func (s *Span) AddAttributes(attributes ...trace.Attribute) {
+func (s *Span) AddAttributes(attributes ...Attribute) {
 	s.internal.AddAttributes(attributes...)
 }
 

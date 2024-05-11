@@ -7,20 +7,17 @@ import (
 // A simple lru.Cache wrapper that tracks the keys of the current contents and
 // the cumulative number of evicted items.
 type lruMap struct {
-	cacheKeys    map[lru.Key]bool
-	cache        *lru.Cache
-	droppedCount int
+	cacheKeys map[lru.Key]bool
+	cache     *lru.Cache
 }
 
 func newLruMap(size int) *lruMap {
 	lm := &lruMap{
-		cacheKeys:    make(map[lru.Key]bool),
-		cache:        lru.New(size),
-		droppedCount: 0,
+		cacheKeys: make(map[lru.Key]bool),
+		cache:     lru.New(size),
 	}
 	lm.cache.OnEvicted = func(key lru.Key, value interface{}) {
 		delete(lm.cacheKeys, key)
-		lm.droppedCount++
 	}
 	return lm
 }

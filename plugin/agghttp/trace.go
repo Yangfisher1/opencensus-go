@@ -52,7 +52,7 @@ func (t *traceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	span.AddAttributes(requestAttrs(req)...)
 
 	if t.isAggregationPoint {
-		attrs := trace.StringAttribute("agg", "y")
+		attrs := aggregator.StringAttribute("agg", "y")
 		span.AddAttributes(attrs)
 	}
 
@@ -92,7 +92,7 @@ func (bt *bodyTracker) Read(b []byte) (int, error) {
 		bt.span.EndAtClient(bt.trailer)
 	default:
 		// For all other errors, set the span status
-		bt.span.SetStatus(trace.Status{
+		bt.span.SetStatus(aggregator.Status{
 			// Code 2 is the error code for Internal server error.
 			Code:    2,
 			Message: err.Error(),
@@ -123,25 +123,25 @@ func spanNameFromURL(req *http.Request) string {
 	return req.URL.Path
 }
 
-func responseAttrs(resp *http.Response) []trace.Attribute {
-	return []trace.Attribute{
-		trace.Int64Attribute(StatusCodeAttribute, int64(resp.StatusCode)),
+func responseAttrs(resp *http.Response) []aggregator.Attribute {
+	return []aggregator.Attribute{
+		aggregator.Int64Attribute(StatusCodeAttribute, int64(resp.StatusCode)),
 	}
 }
 
-func requestAttrs(r *http.Request) []trace.Attribute {
+func requestAttrs(r *http.Request) []aggregator.Attribute {
 	userAgent := r.UserAgent()
 
-	attrs := make([]trace.Attribute, 0, 5)
+	attrs := make([]aggregator.Attribute, 0, 5)
 	attrs = append(attrs,
-		trace.StringAttribute(PathAttribute, r.URL.Path),
-		trace.StringAttribute(URLAttribute, r.URL.String()),
-		trace.StringAttribute(HostAttribute, r.Host),
-		trace.StringAttribute(MethodAttribute, r.Method),
+		aggregator.StringAttribute(PathAttribute, r.URL.Path),
+		aggregator.StringAttribute(URLAttribute, r.URL.String()),
+		aggregator.StringAttribute(HostAttribute, r.Host),
+		aggregator.StringAttribute(MethodAttribute, r.Method),
 	)
 
 	if userAgent != "" {
-		attrs = append(attrs, trace.StringAttribute(UserAgentAttribute, userAgent))
+		attrs = append(attrs, aggregator.StringAttribute(UserAgentAttribute, userAgent))
 	}
 
 	return attrs
@@ -149,7 +149,7 @@ func requestAttrs(r *http.Request) []trace.Attribute {
 
 // TraceStatus is a utility to convert the HTTP status code to a trace.Status that
 // represents the outcome as closely as possible.
-func TraceStatus(httpStatusCode int, statusLine string) trace.Status {
+func TraceStatus(httpStatusCode int, statusLine string) aggregator.Status {
 	var code int32
 	if httpStatusCode < 200 || httpStatusCode >= 400 {
 		code = trace.StatusCodeUnknown
@@ -181,7 +181,7 @@ func TraceStatus(httpStatusCode int, statusLine string) trace.Status {
 		code = trace.StatusCodeAlreadyExists
 	}
 
-	return trace.Status{Code: code, Message: codeToStr[code]}
+	return aggregator.Status{Code: code, Message: codeToStr[code]}
 }
 
 var codeToStr = map[int32]string{

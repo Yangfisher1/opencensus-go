@@ -11,7 +11,6 @@ import (
 	"github.com/Yangfisher1/opencensus-go/aggregator/propagation"
 	"github.com/Yangfisher1/opencensus-go/stats"
 	"github.com/Yangfisher1/opencensus-go/tag"
-	"github.com/Yangfisher1/opencensus-go/trace"
 )
 
 type Handler struct {
@@ -111,7 +110,7 @@ func (t *trackingResponseWriter) end(tags *addedTags) {
 
 		span := aggregator.FromContext(t.ctx)
 		span.SetStatus(TraceStatus(t.statusCode, t.statusLine))
-		span.AddAttributes(trace.Int64Attribute(StatusCodeAttribute, int64(t.statusCode)))
+		span.AddAttributes(aggregator.Int64Attribute(StatusCodeAttribute, int64(t.statusCode)))
 	})
 }
 
