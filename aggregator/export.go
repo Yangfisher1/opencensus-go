@@ -28,9 +28,9 @@ const (
 //
 // The SpanData should not be modified, but a pointer to it can be kept.
 type Exporter interface {
-	ExportSpan(s *SpanData)
-	// Filter whether span is valid or not
+	// Filter whether the span is normal or not
 	FilterSpan(s *SpanData) ErrorType
+	// Report the whole trace chain from the header(whether its request or response)
 	AggregateSpanFromHeader(w http.Header)
 }
 
