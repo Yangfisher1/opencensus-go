@@ -60,6 +60,12 @@ func (t *tracer) StartSpan(ctx context.Context, name string, spanKind int) (cont
 	return t.NewContext(ctx, extSpan), extSpan
 }
 
+func (t *tracer) StartSpanWithRemoteParent(ctx context.Context, name string, parent SpanContext, spanKind int) (context.Context, *Span) {
+	span := startSpanInternal(name, parent != SpanContext{}, parent, spanKind)
+	extSpan := NewSpan(span)
+	return t.NewContext(ctx, extSpan), extSpan
+}
+
 func startSpanInternal(name string, hasParent bool, parent SpanContext, spanKind int) *span {
 	s := &span{}
 	s.spanContext = parent

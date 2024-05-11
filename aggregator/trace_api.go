@@ -10,8 +10,13 @@ import (
 var DefaultTracer Tracer = &tracer{}
 
 type Tracer interface {
-	// We won't have sampler anymore since we want a full tracing
+	// Start a local new span
+	// The height is dependent on whether there's a parent span in the local context
 	StartSpan(ctx context.Context, name string, spanKind int) (context.Context, *Span)
+
+	// Start a new span with new remote height
+	// The height is based on the request header's span context
+	StartSpanWithRemoteParent(ctx context.Context, name string, parent SpanContext, spanKind int) (context.Context, *Span)
 
 	FromContext(ctx context.Context) *Span
 
@@ -47,6 +52,10 @@ type SpanInterface interface {
 
 func StartSpan(ctx context.Context, name string, spanKind int) (context.Context, *Span) {
 	return DefaultTracer.StartSpan(ctx, name, spanKind)
+}
+
+func StartSpanWithRemoteParent(ctx context.Context, name string, parent SpanContext, spanKind int) (context.Context, *Span) {
+	return DefaultTracer.StartSpanWithRemoteParent(ctx, name, parent, spanKind)
 }
 
 func FromContext(ctx context.Context) *Span {
