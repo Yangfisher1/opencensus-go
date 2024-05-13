@@ -50,7 +50,7 @@ func (h *Handler) startTrace(w http.ResponseWriter, r *http.Request) (*http.Requ
 	sc, ok := h.extractSpanContext(r)
 	if ok {
 		// Ok, we have a span from the remote requests
-		fmt.Printf("%s: Parent span height: %d", name, sc.Height)
+		fmt.Printf("%s: Parent span height: %d\n", name, sc.Height)
 		ctx, span = aggregator.StartSpanWithRemoteParent(ctx, name, sc, aggregator.SpanKindServer)
 	} else {
 		// Start a local span by itself
