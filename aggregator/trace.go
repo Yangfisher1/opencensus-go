@@ -72,10 +72,14 @@ func startSpanInternal(name string, hasParent bool, parent SpanContext, spanKind
 
 	// Check whether this is the first one
 	if !hasParent {
+		fmt.Printf("Internal: %s No parent span found\n", name)
 		s.spanContext.Height = 0
 	} else {
+		fmt.Printf("Internal: %s parent span found\n", name)
 		s.spanContext.Height = parent.Height + 1
 	}
+
+	fmt.Printf("Internal: %s Span Height: %d\n", name, s.spanContext.Height)
 
 	s.data = &SpanData{
 		SpanContext: s.spanContext,
