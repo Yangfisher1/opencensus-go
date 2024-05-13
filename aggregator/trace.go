@@ -50,17 +50,20 @@ const (
 
 func (t *tracer) StartSpan(ctx context.Context, name string, spanKind int) (context.Context, *Span) {
 	var parent SpanContext
+	hasParent := false
 	if p := t.FromContext(ctx); p != nil {
 		fmt.Printf("%s: Parent span found locally, height: %d\n", name, p.SpanContext().Height)
 		parent = p.SpanContext()
+		hasParent = true
 	}
-	span := startSpanInternal(name, parent != SpanContext{}, parent, spanKind)
+	span := startSpanInternal(name, hasParent, parent, spanKind)
 
 	extSpan := NewSpan(span)
 	return t.NewContext(ctx, extSpan), extSpan
 }
 
 func (t *tracer) StartSpanWithRemoteParent(ctx context.Context, name string, parent SpanContext, spanKind int) (context.Context, *Span) {
+	// At this point, it should have a remote parent?
 	span := startSpanInternal(name, parent != SpanContext{}, parent, spanKind)
 	extSpan := NewSpan(span)
 	return t.NewContext(ctx, extSpan), extSpan
