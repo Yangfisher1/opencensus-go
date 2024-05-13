@@ -3,6 +3,7 @@ package b3
 import (
 	"encoding/binary"
 	"encoding/hex"
+	"fmt"
 	"net/http"
 
 	"github.com/Yangfisher1/opencensus-go/aggregator"
@@ -21,9 +22,11 @@ var _ propagation.HTTPFormat = (*HTTPFormat)(nil)
 func (f *HTTPFormat) SpanContextFromRequest(req *http.Request) (sc aggregator.SpanContext, ok bool) {
 	height, ok := ParseHeight(req.Header.Get(SpanHeightHeader))
 	if !ok {
+		fmt.Println("Failed to parse Height")
 		return aggregator.SpanContext{}, false
 	}
 
+	fmt.Println("Span Height: ", height)
 	return aggregator.SpanContext{
 		Height: height,
 	}, true

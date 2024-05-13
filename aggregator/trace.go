@@ -51,6 +51,7 @@ const (
 func (t *tracer) StartSpan(ctx context.Context, name string, spanKind int) (context.Context, *Span) {
 	var parent SpanContext
 	if p := t.FromContext(ctx); p != nil {
+		fmt.Printf("%s: Parent span found locally, height: %d\n", name, p.SpanContext().Height)
 		parent = p.SpanContext()
 	}
 	span := startSpanInternal(name, parent != SpanContext{}, parent, spanKind)
