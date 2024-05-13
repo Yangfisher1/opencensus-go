@@ -26,7 +26,6 @@ func (f *HTTPFormat) SpanContextFromRequest(req *http.Request) (sc aggregator.Sp
 		return aggregator.SpanContext{}, false
 	}
 
-	fmt.Println("Span Height: ", height)
 	return aggregator.SpanContext{
 		Height: height,
 	}, true

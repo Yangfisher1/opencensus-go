@@ -2,7 +2,6 @@ package agghttp
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"net/http"
 	"sync"
@@ -50,11 +49,9 @@ func (h *Handler) startTrace(w http.ResponseWriter, r *http.Request) (*http.Requ
 	sc, ok := h.extractSpanContext(r)
 	if ok {
 		// Ok, we have a span from the remote requests
-		fmt.Printf("%s: Parent span height: %d\n", name, sc.Height)
 		ctx, span = aggregator.StartSpanWithRemoteParent(ctx, name, sc, aggregator.SpanKindServer)
 	} else {
 		// Start a local span by itself
-		fmt.Printf("%s: No parent span found\n", name)
 		ctx, span = aggregator.StartSpan(ctx, name, aggregator.SpanKindServer)
 	}
 
