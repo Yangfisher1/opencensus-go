@@ -63,8 +63,8 @@ func (t *tracer) StartSpan(ctx context.Context, name string, spanKind int) (cont
 }
 
 func (t *tracer) StartSpanWithRemoteParent(ctx context.Context, name string, parent SpanContext, spanKind int) (context.Context, *Span) {
-	// At this point, it should have a remote parent?
-	span := startSpanInternal(name, parent != SpanContext{}, parent, spanKind)
+	// Only those who have a remote parent will trigger the function
+	span := startSpanInternal(name, true, parent, spanKind)
 	extSpan := NewSpan(span)
 	return t.NewContext(ctx, extSpan), extSpan
 }
