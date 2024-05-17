@@ -3,6 +3,7 @@ package aggregator
 import (
 	"bytes"
 	"context"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -26,7 +27,7 @@ type span struct {
 }
 
 type SpanContext struct {
-	Height uint32
+	SpanID SpanID
 }
 
 type contextKey struct{}
@@ -71,10 +72,8 @@ func (t *tracer) StartSpanWithRemoteParent(ctx context.Context, name string, par
 func startSpanInternal(name string, hasParent bool, parent SpanContext, spanKind int) *span {
 	s := &span{}
 	// Check whether this is the first one
-	if !hasParent {
-		s.spanContext.Height = 0
-	} else {
-		s.spanContext.Height = parent.Height + 1
+	if hasParent {
+		s.data.ParentSpanId = parent.SpanID
 	}
 
 	s.data = &SpanData{
@@ -208,10 +207,10 @@ func (s *span) String() string {
 		return "<nil>"
 	}
 	if s.data == nil {
-		return fmt.Sprintf("span %d", s.spanContext.Height)
+		return fmt.Sprintf("span %s", s.spanContext.SpanID)
 	}
 	s.mu.Lock()
-	str := fmt.Sprintf("span %d %q", s.spanContext.Height, s.data.Name)
+	str := fmt.Sprintf("span %s %q", s.spanContext.SpanID, s.data.Name)
 	s.mu.Unlock()
 	return str
 }
@@ -237,9 +236,10 @@ func (s *span) makeSpanData() *SpanData {
 
 func makeNormalSpanData(sd *SpanData) *NormalSpanData {
 	return &NormalSpanData{
-		Height: sd.Height,
-		Kind:   sd.SpanKind,
-		Name:   sd.Name,
+		SpanID:   ID(binary.BigEndian.Uint64(sd.SpanID[:])),
+		ParentID: ID(binary.BigEndian.Uint64(sd.ParentSpanId[:])),
+		Kind:     sd.SpanKind,
+		Name:     sd.Name,
 		// TODO: maybe a smarter way is to use a higher base to simplex the timestamp
 		StartTime: strconv.FormatInt(sd.StartTime.UnixMicro(), 10),
 		Duration:  strconv.FormatInt(sd.EndTime.UnixMicro()-sd.StartTime.UnixMicro(), 10),

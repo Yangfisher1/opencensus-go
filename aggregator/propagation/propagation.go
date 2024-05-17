@@ -1,7 +1,6 @@
 package propagation
 
 import (
-	"encoding/binary"
 	"net/http"
 
 	"github.com/Yangfisher1/opencensus-go/aggregator"
@@ -11,8 +10,8 @@ func Binary(sc aggregator.SpanContext) []byte {
 	if sc == (aggregator.SpanContext{}) {
 		return nil
 	}
-	var b [4]byte
-	binary.LittleEndian.PutUint32(b[:], sc.Height)
+	var b [8]byte
+	copy(b[:], sc.SpanID[:])
 	return b[:]
 }
 
@@ -20,7 +19,7 @@ func FromBinary(b []byte) (sc aggregator.SpanContext, ok bool) {
 	if len(b) == 0 {
 		return aggregator.SpanContext{}, false
 	}
-	sc.Height = binary.LittleEndian.Uint32(b)
+	copy(sc.SpanID[:], b)
 	return sc, true
 }
 

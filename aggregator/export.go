@@ -73,9 +73,10 @@ func UnregisterExporter(e Exporter) {
 // SpanData contains all the information collected by a Span.
 type SpanData struct {
 	SpanContext
-	SpanKind  int
-	Name      string
-	StartTime time.Time
+	ParentSpanId SpanID
+	SpanKind     int
+	Name         string
+	StartTime    time.Time
 	// The wall clock time of EndTime will be adjusted to always be offset
 	// from StartTime by the duration of the span.
 	EndTime time.Time
@@ -87,7 +88,8 @@ type SpanData struct {
 
 // Only contains important information
 type NormalSpanData struct {
-	Height    uint32 `json:"h"`
+	SpanID    ID     `json:"s"`
+	ParentID  ID     `json:"p"`
 	Kind      int    `json:"k"`
 	Name      string `json:"n"`
 	StartTime string `json:"t"`

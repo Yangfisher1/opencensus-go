@@ -1,9 +1,7 @@
 package b3
 
 import (
-	"encoding/binary"
 	"encoding/hex"
-	"fmt"
 	"net/http"
 
 	"github.com/Yangfisher1/opencensus-go/aggregator"
@@ -11,7 +9,7 @@ import (
 )
 
 const (
-	SpanHeightHeader = "X-B3-SpanHeight"
+	SpanIDHeader = "X-B3-SpanId"
 )
 
 type HTTPFormat struct{}
@@ -20,32 +18,30 @@ var _ propagation.HTTPFormat = (*HTTPFormat)(nil)
 
 // SpanContextFromRequest extracts a B3 span context from incoming requests.
 func (f *HTTPFormat) SpanContextFromRequest(req *http.Request) (sc aggregator.SpanContext, ok bool) {
-	height, ok := ParseHeight(req.Header.Get(SpanHeightHeader))
+	sid, ok := ParseSpanID(req.Header.Get(SpanIDHeader))
 	if !ok {
-		fmt.Println("Failed to parse Height")
 		return aggregator.SpanContext{}, false
 	}
 
 	return aggregator.SpanContext{
-		Height: height,
+		SpanID: sid,
 	}, true
 }
 
-func ParseHeight(height string) (uint32, bool) {
-	if height == "" {
-		return 0, false
+// ParseSpanID parses the value of the X-B3-SpanId or X-B3-ParentSpanId headers.
+func ParseSpanID(sid string) (spanID aggregator.SpanID, ok bool) {
+	if sid == "" {
+		return aggregator.SpanID{}, false
 	}
-	b, err := hex.DecodeString(height)
-	if err != nil || len(b) > 4 {
-		return 0, false
+	b, err := hex.DecodeString(sid)
+	if err != nil || len(b) > 8 {
+		return aggregator.SpanID{}, false
 	}
-
-	h := binary.LittleEndian.Uint32(b)
-	return h, true
+	start := 8 - len(b)
+	copy(spanID[start:], b)
+	return spanID, true
 }
 
 func (f *HTTPFormat) SpanContextToRequest(sc aggregator.SpanContext, req *http.Request) {
-	var b [4]byte
-	binary.LittleEndian.PutUint32(b[:], sc.Height)
-	req.Header.Set(SpanHeightHeader, hex.EncodeToString(b[:]))
+	req.Header.Set(SpanIDHeader, hex.EncodeToString(sc.SpanID[:]))
 }
