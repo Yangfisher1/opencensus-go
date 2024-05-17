@@ -14,6 +14,12 @@
 
 package aggregator
 
+import (
+	"sync"
+
+	"github.com/Yangfisher1/opencensus-go/aggregator/internal"
+)
+
 // Now just uses these parameters forever
 const (
 	// DefaultMaxAnnotationEventsPerSpan is default max number of annotation events per span
@@ -28,3 +34,47 @@ const (
 	// DefaultMaxLinksPerSpan is default max number of links per span
 	DefaultMaxLinksPerSpan = 32
 )
+
+var configWriteMu sync.Mutex
+
+type Config struct {
+	// IDGenerator is for internal use only.
+	IDGenerator internal.IDGenerator
+
+	// MaxAnnotationEventsPerSpan is max number of annotation events per span
+	MaxAnnotationEventsPerSpan int
+
+	// MaxMessageEventsPerSpan is max number of message events per span
+	MaxMessageEventsPerSpan int
+
+	// MaxAnnotationEventsPerSpan is max number of attributes per span
+	MaxAttributesPerSpan int
+
+	// MaxLinksPerSpan is max number of links per span
+	MaxLinksPerSpan int
+}
+
+// ApplyConfig applies changes to the global tracing configuration.
+//
+// Fields not provided in the given config are going to be preserved.
+func ApplyConfig(cfg Config) {
+	configWriteMu.Lock()
+	defer configWriteMu.Unlock()
+	c := *config.Load().(*Config)
+	if cfg.IDGenerator != nil {
+		c.IDGenerator = cfg.IDGenerator
+	}
+	if cfg.MaxAnnotationEventsPerSpan > 0 {
+		c.MaxAnnotationEventsPerSpan = cfg.MaxAnnotationEventsPerSpan
+	}
+	if cfg.MaxMessageEventsPerSpan > 0 {
+		c.MaxMessageEventsPerSpan = cfg.MaxMessageEventsPerSpan
+	}
+	if cfg.MaxAttributesPerSpan > 0 {
+		c.MaxAttributesPerSpan = cfg.MaxAttributesPerSpan
+	}
+	if cfg.MaxLinksPerSpan > 0 {
+		c.MaxLinksPerSpan = cfg.MaxLinksPerSpan
+	}
+	config.Store(&c)
+}

@@ -3,16 +3,17 @@ package aggregator
 import (
 	"bytes"
 	"context"
+	crand "crypto/rand"
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/Yangfisher1/opencensus-go/internal"
-	"honnef.co/go/tools/config"
 )
 
 type tracer struct{}
@@ -32,6 +33,8 @@ type SpanContext struct {
 }
 
 type contextKey struct{}
+
+var config atomic.Value // access atomically
 
 func (t *tracer) FromContext(ctx context.Context) *Span {
 	s, _ := ctx.Value(contextKey{}).(*Span)
@@ -253,4 +256,57 @@ func makeNormalSpanData(sd *SpanData) *NormalSpanData {
 		StartTime: strconv.FormatInt(sd.StartTime.UnixMicro(), 10),
 		Duration:  strconv.FormatInt(sd.EndTime.UnixMicro()-sd.StartTime.UnixMicro(), 10),
 	}
+}
+
+func init() {
+	config.Store(&Config{
+		IDGenerator:                &defaultIDGenerator{},
+		MaxAttributesPerSpan:       DefaultMaxAttributesPerSpan,
+		MaxAnnotationEventsPerSpan: DefaultMaxAnnotationEventsPerSpan,
+		MaxMessageEventsPerSpan:    DefaultMaxMessageEventsPerSpan,
+		MaxLinksPerSpan:            DefaultMaxLinksPerSpan,
+	})
+}
+
+type defaultIDGenerator struct {
+	sync.Mutex
+
+	// Please keep these as the first fields
+	// so that these 8 byte fields will be aligned on addresses
+	// divisible by 8, on both 32-bit and 64-bit machines when
+	// performing atomic increments and accesses.
+	// See:
+	// * https://github.com/census-instrumentation/opencensus-go/issues/587
+	// * https://github.com/census-instrumentation/opencensus-go/issues/865
+	// * https://golang.org/pkg/sync/atomic/#pkg-note-BUG
+	nextSpanID uint64
+	spanIDInc  uint64
+
+	initOnce sync.Once
+}
+
+// init initializes the generator on the first call to avoid consuming entropy
+// unnecessarily.
+func (gen *defaultIDGenerator) init() {
+	gen.initOnce.Do(func() {
+		// initialize traceID and spanID generators.
+		var rngSeed int64
+		for _, p := range []interface{}{
+			&rngSeed, &gen.nextSpanID, &gen.spanIDInc,
+		} {
+			binary.Read(crand.Reader, binary.LittleEndian, p)
+		}
+		gen.spanIDInc |= 1
+	})
+}
+
+// NewSpanID returns a non-zero span ID from a randomly-chosen sequence.
+func (gen *defaultIDGenerator) NewSpanID() [8]byte {
+	var id uint64
+	for id == 0 {
+		id = atomic.AddUint64(&gen.nextSpanID, gen.spanIDInc)
+	}
+	var sid [8]byte
+	binary.LittleEndian.PutUint64(sid[:], id)
+	return sid
 }
