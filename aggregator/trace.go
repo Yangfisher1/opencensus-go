@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/Yangfisher1/opencensus-go/internal"
+	"honnef.co/go/tools/config"
 )
 
 type tracer struct{}
@@ -71,16 +72,24 @@ func (t *tracer) StartSpanWithRemoteParent(ctx context.Context, name string, par
 
 func startSpanInternal(name string, hasParent bool, parent SpanContext, spanKind int) *span {
 	s := &span{}
-	// Check whether this is the first one
-	if hasParent {
-		s.data.ParentSpanId = parent.SpanID
+	s.spanContext = parent
+
+	cfg := config.Load().(*Config)
+	if gen, ok := cfg.IDGenerator.(*defaultIDGenerator); ok {
+		// lazy initialization
+		gen.init()
 	}
+	s.spanContext.SpanID = cfg.IDGenerator.NewSpanID()
 
 	s.data = &SpanData{
 		SpanContext: s.spanContext,
 		StartTime:   time.Now(),
 		Name:        name,
 		SpanKind:    spanKind,
+	}
+	// Check whether this is the first one
+	if hasParent {
+		s.data.ParentSpanId = parent.SpanID
 	}
 
 	s.lruAttributes = newLruMap(DefaultMaxAttributesPerSpan)
