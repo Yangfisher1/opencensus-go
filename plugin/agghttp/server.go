@@ -24,6 +24,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var tags addedTags
 	// Adding the trailer headers here
 	w.Header().Set("Trailer", "Agg")
+	w.Header().Set("Transfer-Encoding", "chunked")
 
 	r, traceEnd := h.startTrace(w, r)
 	defer traceEnd(w, r)
