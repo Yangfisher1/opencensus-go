@@ -17,7 +17,6 @@ package exporter // import "github.com/Yangfisher1/opencensus-go/examples/export
 import (
 	"encoding/hex"
 	"fmt"
-	"net/http"
 	"regexp"
 	"time"
 
@@ -101,18 +100,6 @@ func (e *PrintExporter) ExportSpan(vd *trace.SpanData) {
 		fmt.Println("Attributes:")
 		for k, v := range vd.Attributes {
 			fmt.Printf("%v- %v=%v\n", indent, k, v)
-		}
-	}
-}
-
-func (e *PrintExporter) FilterSpan(s *trace.SpanData) trace.ErrorType {
-	return trace.OK
-}
-
-func (e *PrintExporter) AggregateSpanFromHeader(w http.Header) {
-	for key, value := range w {
-		for _, v := range value {
-			fmt.Println(key, v)
 		}
 	}
 }

@@ -15,7 +15,6 @@
 package trace
 
 import (
-	"net/http"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -30,9 +29,6 @@ import (
 // The SpanData should not be modified, but a pointer to it can be kept.
 type Exporter interface {
 	ExportSpan(s *SpanData)
-	// Filter whether span is valid or not
-	FilterSpan(s *SpanData) ErrorType
-	AggregateSpanFromHeader(w http.Header)
 }
 
 type exportersMap map[Exporter]struct{}
@@ -99,24 +95,3 @@ type SpanData struct {
 	// ChildSpanCount holds the number of child span created for this span.
 	ChildSpanCount int
 }
-
-// ServerlessSpanData contains all the necessary information for a normal serverless span.
-// TODO: simplify this struct later maybe
-type ServerlessSpanData struct {
-	TraceID      string `json:"t,omitempty"`
-	SpanID       string `json:"s,omitempty"`
-	ParentSpanID string `json:"p,omitempty"`
-	Name         string `json:"n,omitempty"`
-	StartTime    string `json:"f"`
-	Duration     string `json:"d"`
-}
-
-type ErrorType int
-
-const (
-	OK ErrorType = iota
-	Aggregate
-	UserSpec
-	PerformanceDown
-	Error
-)

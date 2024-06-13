@@ -16,7 +16,6 @@ package trace
 
 import (
 	"context"
-	"net/http"
 )
 
 // DefaultTracer is the tracer used when package-level exported functions are invoked.
@@ -94,12 +93,6 @@ type SpanInterface interface {
 	// End ends the span.
 	End()
 
-	// EndAndAggregate ends the span with response aggregation
-	EndAndAggregate(w http.ResponseWriter, r *http.Request)
-
-	// EndAtClient ends the span as a client span and propagation in resp.
-	EndAtClient(h *http.Header)
-
 	// SpanContext returns the SpanContext of the span.
 	SpanContext() SpanContext
 
@@ -176,21 +169,6 @@ func (s *Span) End() {
 		return
 	}
 	s.internal.End()
-}
-
-// End ends the span with response aggregation
-func (s *Span) EndAndAggregate(w http.ResponseWriter, r *http.Request) {
-	if s == nil {
-		return
-	}
-	s.internal.EndAndAggregate(w, r)
-}
-
-func (s *Span) EndAtClient(h *http.Header) {
-	if s == nil {
-		return
-	}
-	s.internal.EndAtClient(h)
 }
 
 // SpanContext returns the SpanContext of the span.

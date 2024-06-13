@@ -21,7 +21,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"sync"
 	"time"
@@ -220,18 +219,6 @@ func (e *LogExporter) ExportSpan(sd *trace.SpanData) {
 			e.tLogger.Printf("UncompressedByteSize: %v", item.UncompressedByteSize)
 			e.tLogger.Printf("CompressedByteSize: %v", item.CompressedByteSize)
 			e.tLogger.Println()
-		}
-	}
-}
-
-func (e *LogExporter) FilterSpan(s *trace.SpanData) trace.ErrorType {
-	return trace.OK
-}
-
-func (e *LogExporter) AggregateSpanFromHeader(w http.Header) {
-	for key, value := range w {
-		for _, v := range value {
-			fmt.Println(key, v)
 		}
 	}
 }

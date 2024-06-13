@@ -40,13 +40,11 @@ const (
 )
 
 type traceTransport struct {
-	base               http.RoundTripper
-	startOptions       trace.StartOptions
-	format             propagation.HTTPFormat
-	formatSpanName     func(*http.Request) string
-	newClientTrace     func(*http.Request, *trace.Span) *httptrace.ClientTrace
-	isUserSpan         bool
-	isAggregationPoint bool
+	base           http.RoundTripper
+	startOptions   trace.StartOptions
+	format         propagation.HTTPFormat
+	formatSpanName func(*http.Request) string
+	newClientTrace func(*http.Request, *trace.Span) *httptrace.ClientTrace
 }
 
 // TODO(jbd): Add message events for request and response size.
@@ -83,26 +81,12 @@ func (t *traceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	}
 
 	span.AddAttributes(requestAttrs(req)...)
-
-	if t.isUserSpan {
-		attrs := trace.StringAttribute("usr", "y")
-		span.AddAttributes(attrs)
-	}
-
-	if t.isAggregationPoint {
-		attrs := trace.StringAttribute("agg", "y")
-		span.AddAttributes(attrs)
-	}
-
 	resp, err := t.base.RoundTrip(req)
 	if err != nil {
 		span.SetStatus(trace.Status{Code: trace.StatusCodeUnknown, Message: err.Error()})
-		span.End() // Error case, we can directly report the span.
+		span.End()
 		return resp, err
 	}
-
-	// Prevent overloading of trailer header
-	resp.Trailer = make(http.Header)
 
 	span.AddAttributes(responseAttrs(resp)...)
 	span.SetStatus(TraceStatus(resp.StatusCode, resp.Status))
@@ -110,8 +94,7 @@ func (t *traceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	// span.End() will be invoked after
 	// a read from resp.Body returns io.EOF or when
 	// resp.Body.Close() is invoked.
-	// FIXME: The problem could be here by doubling the aggregated span info into the trailer within the resp Body.
-	bt := &bodyTracker{rc: resp.Body, span: span, trailer: &resp.Trailer}
+	bt := &bodyTracker{rc: resp.Body, span: span}
 	resp.Body = wrappedBody(bt, resp.Body)
 	return resp, err
 }
@@ -120,21 +103,20 @@ func (t *traceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 // trace.EndSpan on encountering io.EOF on reading
 // the body of the original response.
 type bodyTracker struct {
-	rc      io.ReadCloser
-	span    *trace.Span
-	trailer *http.Header
+	rc   io.ReadCloser
+	span *trace.Span
 }
 
 var _ io.ReadCloser = (*bodyTracker)(nil)
 
 func (bt *bodyTracker) Read(b []byte) (int, error) {
 	n, err := bt.rc.Read(b)
-	// n, err := bt.rc.Read(b)
+
 	switch err {
 	case nil:
 		return n, nil
 	case io.EOF:
-		bt.span.EndAtClient(bt.trailer)
+		bt.span.End()
 	default:
 		// For all other errors, set the span status
 		bt.span.SetStatus(trace.Status{
@@ -150,7 +132,7 @@ func (bt *bodyTracker) Close() error {
 	// Invoking endSpan on Close will help catch the cases
 	// in which a read returned a non-nil error, we set the
 	// span status but didn't end the span.
-	bt.span.EndAtClient(bt.trailer)
+	bt.span.End()
 	return bt.rc.Close()
 }
 
@@ -255,7 +237,7 @@ func isHealthEndpoint(path string) bool {
 	// can be extremely noisy and expensive.
 	// Disable canonical health checking endpoints
 	// like /healthz and /_ah/health for now.
-	if path == "/healthz" || path == "/_ah/health" || path == "/probe" {
+	if path == "/healthz" || path == "/_ah/health" {
 		return true
 	}
 	return false

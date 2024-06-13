@@ -15,15 +15,11 @@
 package trace
 
 import (
-	"bytes"
 	"context"
 	crand "crypto/rand"
 	"encoding/binary"
-	"encoding/json"
 	"fmt"
 	"math/rand"
-	"net/http"
-	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -266,7 +262,8 @@ func startSpanInternal(name string, hasParent bool, parent SpanContext, remotePa
 		s.data.ParentSpanID = parent.SpanID
 	}
 	if internal.LocalSpanStoreEnabled {
-		ss := spanStoreForNameCreateIfNew(name)
+		var ss *spanStore
+		ss = spanStoreForNameCreateIfNew(name)
 		if ss != nil {
 			s.spanStore = ss
 			ss.add(s)
@@ -296,139 +293,9 @@ func (s *span) End() {
 			if s.spanStore != nil {
 				s.spanStore.finished(s, sd)
 			}
-			// Currently move whether to export into Exporters.
 			if mustExport {
 				for e := range exp {
 					e.ExportSpan(sd)
-				}
-			}
-		}
-	})
-}
-
-// End ends the span with response aggregation
-func (s *span) EndAndAggregate(w http.ResponseWriter, r *http.Request) {
-	if s == nil {
-		return
-	}
-	if s.executionTracerTaskEnd != nil {
-		s.executionTracerTaskEnd()
-	}
-	if !s.IsRecordingEvents() {
-		return
-	}
-	s.endOnce.Do(func() {
-		exp, _ := exporters.Load().(exportersMap)
-		mustExport := s.spanContext.IsSampled() && len(exp) > 0
-		if s.spanStore != nil || mustExport {
-			sd := s.makeSpanData()
-			sd.EndTime = internal.MonotonicEndTime(sd.StartTime)
-			if s.spanStore != nil {
-				s.spanStore.finished(s, sd)
-			}
-			if mustExport {
-				// Check whether the request is valid or not
-				for e := range exp {
-					errType := e.FilterSpan(sd)
-					switch errType {
-					case OK:
-						ssd := makeServerlessSpanData(sd)
-						// Valid one, encoding information into the response header
-						buf := new(bytes.Buffer)
-						err := json.NewEncoder(buf).Encode(ssd)
-						if err != nil {
-							fmt.Println("Failed to encoding data into hdr", err)
-							return
-						}
-						w.Header().Add("Agg", buf.String())
-					case Aggregate:
-						ssd := makeServerlessSpanData(sd)
-						// Valid one, encoding information into the response header
-						buf := new(bytes.Buffer)
-						err := json.NewEncoder(buf).Encode(ssd)
-						if err != nil {
-							fmt.Println("Failed to encoding data into hdr", err)
-							return
-						}
-						w.Header().Add("Agg", buf.String())
-						e.AggregateSpanFromHeader(w.Header())
-					case PerformanceDown:
-						// Just encoding the whole information here
-						buf := new(bytes.Buffer)
-						err := json.NewEncoder(buf).Encode(sd)
-						if err != nil {
-							fmt.Println("Failed to encoding data into hdr", err)
-							return
-						}
-						w.Header().Add("Agg", buf.String())
-					case Error, UserSpec:
-						// Report the span immediately
-						e.ExportSpan(sd)
-					}
-				}
-			}
-		}
-	})
-}
-
-func (s *span) EndAtClient(resp *http.Header) {
-	if s == nil {
-		return
-	}
-	if s.executionTracerTaskEnd != nil {
-		s.executionTracerTaskEnd()
-	}
-	if !s.IsRecordingEvents() {
-		return
-	}
-	s.endOnce.Do(func() {
-		exp, _ := exporters.Load().(exportersMap)
-		mustExport := s.spanContext.IsSampled() && len(exp) > 0
-		if s.spanStore != nil || mustExport {
-			sd := s.makeSpanData()
-			sd.EndTime = internal.MonotonicEndTime(sd.StartTime)
-			if s.spanStore != nil {
-				s.spanStore.finished(s, sd)
-			}
-			if mustExport {
-				// Check whether the request is valid or not
-				for e := range exp {
-					errType := e.FilterSpan(sd)
-					switch errType {
-					case OK:
-						ssd := makeServerlessSpanData(sd)
-						// Valid one, encoding information into the response header
-						buf := new(bytes.Buffer)
-						err := json.NewEncoder(buf).Encode(ssd)
-						if err != nil {
-							fmt.Println("Failed to encoding data into hdr", err)
-							return
-						}
-						resp.Add("Agg", buf.String())
-					case Aggregate:
-						ssd := makeServerlessSpanData(sd)
-						// Valid one, encoding information into the response header
-						buf := new(bytes.Buffer)
-						err := json.NewEncoder(buf).Encode(ssd)
-						if err != nil {
-							fmt.Println("Failed to encoding data into hdr", err)
-							return
-						}
-						resp.Add("Agg", buf.String())
-						e.AggregateSpanFromHeader(*resp)
-					case PerformanceDown:
-						// Just encoding the whole information here
-						buf := new(bytes.Buffer)
-						err := json.NewEncoder(buf).Encode(sd)
-						if err != nil {
-							fmt.Println("Failed to encoding data into hdr", err)
-							return
-						}
-						resp.Add("Agg", buf.String())
-					case Error, UserSpec:
-						// Report the span immediately
-						e.ExportSpan(sd)
-					}
 				}
 			}
 		}
@@ -459,26 +326,6 @@ func (s *span) makeSpanData() *SpanData {
 	}
 	s.mu.Unlock()
 	return &sd
-}
-
-func makeServerlessSpanData(sd *SpanData) ServerlessSpanData {
-	var ssd ServerlessSpanData
-
-	ssd.TraceID = sd.TraceID.String()
-	// TODO: maybe use base64 encoding here to reduce network packet size?
-	// ssd.TraceID = base64.StdEncoding.EncodeToString(sd.TraceID[:])
-	ssd.SpanID = sd.SpanID.String()
-	// Maybe parentSpanId can be NULL
-	if sd.ParentSpanID != [8]byte{} {
-		ssd.ParentSpanID = sd.ParentSpanID.String()
-	} else {
-		ssd.ParentSpanID = ""
-	}
-	ssd.Name = sd.Name
-	ssd.StartTime = strconv.FormatInt(sd.StartTime.UnixMicro(), 10)
-	ssd.Duration = strconv.FormatInt(sd.EndTime.UnixMicro()-sd.StartTime.UnixMicro(), 10)
-
-	return ssd
 }
 
 // SpanContext returns the SpanContext of the span.
