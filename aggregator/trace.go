@@ -142,6 +142,7 @@ func (s *span) EndAndAggregate(w http.ResponseWriter, r *http.Request) {
 
 func (s *span) EndAtClient(h *http.Header) {
 	if s == nil {
+		fmt.Println("The span is empty")
 		return
 	}
 	s.endOnce.Do(func() {
@@ -168,6 +169,7 @@ func (s *span) EndAtClient(h *http.Header) {
 				fmt.Println("Trailer after: ", h)
 				fmt.Println("Normally adding data into the header", buf.String())
 			case Aggregate:
+				fmt.Println("The span is aggregatorable")
 				ssd := makeNormalSpanData(sd)
 				// Valid one, encoding information into the response header
 				buf := new(bytes.Buffer)
