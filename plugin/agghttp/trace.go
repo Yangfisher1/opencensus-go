@@ -1,6 +1,8 @@
 package agghttp
 
 import (
+	"encoding/hex"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -33,6 +35,8 @@ type traceTransport struct {
 func (t *traceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	name := t.formatSpanName(req)
 	ctx, span := aggregator.StartSpan(req.Context(), name, aggregator.SpanKindClient)
+	id := span.SpanContext().SpanID
+	fmt.Println("req ID:", hex.EncodeToString(id[:]))
 	req = req.WithContext(ctx)
 
 	if t.format != nil {
