@@ -1,7 +1,6 @@
 package agghttp
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 
@@ -63,11 +62,7 @@ func (t *traceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	}
 
 	// Prevent overloading of trailer header
-	if resp.Trailer != nil {
-		fmt.Println(resp.Trailer)
-	} else {
-		resp.Trailer = make(http.Header)
-	}
+	resp.Trailer = make(http.Header)
 
 	span.AddAttributes(responseAttrs(resp)...)
 	span.SetStatus(TraceStatus(resp.StatusCode, resp.Status))
