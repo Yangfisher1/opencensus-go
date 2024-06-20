@@ -37,6 +37,7 @@ func (t *traceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	ctx, span := aggregator.StartSpan(req.Context(), name, aggregator.SpanKindClient)
 	id := span.SpanContext().SpanID
 	fmt.Println("req ID:", hex.EncodeToString(id[:]))
+	fmt.Println("parent ID:", hex.EncodeToString(id[:]))
 	req = req.WithContext(ctx)
 
 	if t.format != nil {
@@ -93,7 +94,9 @@ func (bt *bodyTracker) Read(b []byte) (int, error) {
 	case nil:
 		return n, nil
 	case io.EOF:
+		fmt.Println("before end:", bt.trailer)
 		bt.span.EndAtClient(bt.trailer)
+		fmt.Println("after end:", bt.trailer)
 	default:
 		// For all other errors, set the span status
 		bt.span.SetStatus(aggregator.Status{
