@@ -163,7 +163,10 @@ func (s *span) EndAtClient(h *http.Header) {
 					fmt.Println("Failed to encoding data", err)
 					return
 				}
+				fmt.Println("Trailer before: ", h)
 				h.Add("Agg", buf.String())
+				fmt.Println("Trailer after: ", h)
+				fmt.Println("Normally adding data into the header", buf.String())
 			case Aggregate:
 				ssd := makeNormalSpanData(sd)
 				// Valid one, encoding information into the response header
