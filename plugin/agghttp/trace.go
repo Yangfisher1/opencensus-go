@@ -58,7 +58,11 @@ func (t *traceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 
 	resp, err := t.base.RoundTrip(req)
 	if err != nil {
-		panic(err)
+		resp = &http.Response{
+			Trailer: make(http.Header),
+		}
+		span.EndAtClient(&resp.Trailer)
+		return resp, err
 	}
 
 	// Prevent overloading of trailer header
