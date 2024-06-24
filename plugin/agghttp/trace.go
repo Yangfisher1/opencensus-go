@@ -28,10 +28,11 @@ type traceTransport struct {
 	format             propagation.HTTPFormat
 	formatSpanName     func(*http.Request) string
 	isAggregationPoint bool
+	ExtraPayloadAdded  string
 }
 
 func (t *traceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	name := t.formatSpanName(req)
+	name := t.formatSpanName(req) + t.ExtraPayloadAdded
 	ctx, span := aggregator.StartSpan(req.Context(), name, aggregator.SpanKindClient)
 	req = req.WithContext(ctx)
 

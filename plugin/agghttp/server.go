@@ -18,6 +18,7 @@ type Handler struct {
 	Handler            http.Handler
 	FormatSpanName     func(*http.Request) string
 	IsAggregationPoint bool
+	ExtraPayloadAdded  string
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -41,9 +42,9 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) startTrace(w http.ResponseWriter, r *http.Request) (*http.Request, func(http.ResponseWriter, *http.Request)) {
 	var name string
 	if h.FormatSpanName == nil {
-		name = spanNameFromURL(r)
+		name = spanNameFromURL(r) + h.ExtraPayloadAdded
 	} else {
-		name = h.FormatSpanName(r)
+		name = h.FormatSpanName(r) + h.ExtraPayloadAdded
 	}
 	ctx := r.Context()
 
