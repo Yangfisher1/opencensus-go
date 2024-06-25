@@ -1,7 +1,6 @@
 package aggregator
 
 import (
-	"bytes"
 	"context"
 	crand "crypto/rand"
 	"encoding/binary"
@@ -9,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -115,25 +115,9 @@ func (s *span) EndAndAggregate(w http.ResponseWriter, r *http.Request) {
 			// Currently just keep the important info first
 			switch errType {
 			case OK:
-				ssd := makeNormalSpanData(sd)
-				// Valid one, encoding information into the response header
-				buf := new(bytes.Buffer)
-				err := json.NewEncoder(buf).Encode(ssd)
-				if err != nil {
-					fmt.Println("Failed to encoding data", err)
-					return
-				}
-				w.Header().Add("Agg", buf.String())
+				w.Header().Add("Agg", exportSpanDataToStringV3())
 			case Aggregate:
-				ssd := makeNormalSpanData(sd)
-				// Valid one, encoding information into the response header
-				buf := new(bytes.Buffer)
-				err := json.NewEncoder(buf).Encode(ssd)
-				if err != nil {
-					fmt.Println("Failed to encoding data", err)
-					return
-				}
-				w.Header().Add("Agg", buf.String())
+				w.Header().Add("Agg", exportSpanDataToStringV3())
 				e.AggregateSpanFromHeader(w.Header())
 			}
 		}
@@ -155,25 +139,9 @@ func (s *span) EndAtClient(h *http.Header) {
 			// Currently just keep the important info first
 			switch errType {
 			case OK:
-				ssd := makeNormalSpanData(sd)
-				// Valid one, encoding information into the response header
-				buf := new(bytes.Buffer)
-				err := json.NewEncoder(buf).Encode(ssd)
-				if err != nil {
-					fmt.Println("Failed to encoding data", err)
-					return
-				}
-				h.Add("Agg", buf.String())
+				h.Add("Agg", exportSpanDataToStringV3())
 			case Aggregate:
-				ssd := makeNormalSpanData(sd)
-				// Valid one, encoding information into the response header
-				buf := new(bytes.Buffer)
-				err := json.NewEncoder(buf).Encode(ssd)
-				if err != nil {
-					fmt.Println("Failed to encoding data", err)
-					return
-				}
-				h.Add("Agg", buf.String())
+				h.Add("Agg", exportSpanDataToStringV3())
 				e.AggregateSpanFromHeader(*h)
 			}
 		}
@@ -246,16 +214,60 @@ func (s *span) makeSpanData() *SpanData {
 	return &sd
 }
 
-func makeNormalSpanData(sd *SpanData) *NormalSpanData {
-	return &NormalSpanData{
-		SpanID:   ID(binary.BigEndian.Uint64(sd.SpanID[:])),
-		ParentID: ID(binary.BigEndian.Uint64(sd.ParentSpanId[:])),
-		Kind:     sd.SpanKind,
-		Name:     sd.Name,
-		// TODO: maybe a smarter way is to use a higher base to simplex the timestamp
+// V1 := adding more payload one
+func exportSpanDataToStringV1(sd *SpanData) string {
+	var builder strings.Builder
+	data := NormalSpanData{
+		SpanID:    ID(binary.BigEndian.Uint64(sd.SpanID[:])),
+		ParentID:  ID(binary.BigEndian.Uint64(sd.ParentSpanId[:])),
+		Kind:      sd.SpanKind,
+		Name:      sd.Name,
 		StartTime: strconv.FormatInt(sd.StartTime.UnixMicro(), 10),
 		Duration:  strconv.FormatInt(sd.EndTime.UnixMicro()-sd.StartTime.UnixMicro(), 10),
 	}
+	err := json.NewEncoder(&builder).Encode(data)
+	if err != nil {
+		fmt.Println("Failed to encode span data: ", err)
+		return ""
+	}
+
+	return builder.String()
+}
+
+// V2 := + reduction ~= 130 bytes
+func exportSpanDataToStringV2() string {
+	var builder strings.Builder
+	data := SpanDataV2{
+		Height:    1,
+		Name:      strings.Repeat("a", 90),
+		StartTime: "fffff",
+		Duration:  "fffff",
+	}
+	err := json.NewEncoder(&builder).Encode(data)
+	if err != nil {
+		fmt.Println("Failed to encode span data: ", err)
+		return ""
+	}
+
+	return builder.String()
+}
+
+// V3 := + backend-offloading ~= 40 bytes
+func exportSpanDataToStringV3() string {
+	var builder strings.Builder
+	data := SpanDataV2{
+		Height:    1,
+		Name:      "a",
+		StartTime: "fffff",
+		Duration:  "fffff",
+	}
+	err := json.NewEncoder(&builder).Encode(data)
+	if err != nil {
+		fmt.Println("Failed to encode span data: ", err)
+		return ""
+	}
+
+	return builder.String()
 }
 
 func init() {
