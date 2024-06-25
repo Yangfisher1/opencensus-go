@@ -98,8 +98,8 @@ type NormalSpanData struct {
 
 // Version 2 of the spandata with fewer information
 type SpanDataV2 struct {
-	Height    int    `json:h`
-	Name      string `json:n`
-	StartTime string `json:t`
-	Duration  string `json:d`
+	Height    int    `json:"h"`
+	Name      string `json:"n"`
+	StartTime string `json:"t"`
+	Duration  string `json:"d"`
 }
