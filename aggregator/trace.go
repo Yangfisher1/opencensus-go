@@ -240,8 +240,8 @@ func exportSpanDataToStringV2() string {
 	data := SpanDataV2{
 		Height:    1,
 		Name:      strings.Repeat("a", 90),
-		StartTime: "fffff",
-		Duration:  "fffff",
+		StartTime: "11111",
+		Duration:  "11111",
 	}
 	err := json.NewEncoder(&builder).Encode(data)
 	if err != nil {
@@ -258,8 +258,8 @@ func exportSpanDataToStringV3() string {
 	data := SpanDataV2{
 		Height:    1,
 		Name:      "a",
-		StartTime: "fffff",
-		Duration:  "fffff",
+		StartTime: "11111",
+		Duration:  "11111",
 	}
 	err := json.NewEncoder(&builder).Encode(data)
 	if err != nil {
