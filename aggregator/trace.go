@@ -115,9 +115,9 @@ func (s *span) EndAndAggregate(w http.ResponseWriter, r *http.Request) {
 			// Currently just keep the important info first
 			switch errType {
 			case OK:
-				w.Header().Add("Agg", exportSpanDataToStringV3())
+				w.Header().Add("Agg", exportSpanDataToStringV4(sd))
 			case Aggregate:
-				w.Header().Add("Agg", exportSpanDataToStringV3())
+				w.Header().Add("Agg", exportSpanDataToStringV4(sd))
 				e.AggregateSpanFromHeader(w.Header())
 			}
 		}
@@ -139,9 +139,9 @@ func (s *span) EndAtClient(h *http.Header) {
 			// Currently just keep the important info first
 			switch errType {
 			case OK:
-				h.Add("Agg", exportSpanDataToStringV3())
+				h.Add("Agg", exportSpanDataToStringV4(sd))
 			case Aggregate:
-				h.Add("Agg", exportSpanDataToStringV3())
+				h.Add("Agg", exportSpanDataToStringV4(sd))
 				e.AggregateSpanFromHeader(*h)
 			}
 		}
@@ -260,6 +260,24 @@ func exportSpanDataToStringV3() string {
 		Name:      "a",
 		StartTime: "11111",
 		Duration:  "11111",
+	}
+	err := json.NewEncoder(&builder).Encode(data)
+	if err != nil {
+		fmt.Println("Failed to encode span data: ", err)
+		return ""
+	}
+
+	return builder.String()
+}
+
+// V4 : make it ok for error check
+func exportSpanDataToStringV4(sd *SpanData) string {
+	var builder strings.Builder
+	data := SpanDataV2{
+		Height:    1,
+		Name:      sd.Name,
+		StartTime: "1111111111",
+		Duration:  "111",
 	}
 	err := json.NewEncoder(&builder).Encode(data)
 	if err != nil {
